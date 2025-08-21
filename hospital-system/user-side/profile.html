@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人中心 - 医疗预约系统</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <style>
+        /* 个人中心页面特定样式 */
+        .profile-container {
+            display: flex;
+            min-height: 100vh;
+            background-color: #f8f9fa;
+        }
+        
+        .sidebar {
+            width: 250px;
+            background-color: #fff;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+        
+        .sidebar h3 {
+            margin: 0 0 20px 0;
+            color: #333;
+            font-size: 20px;
+            text-align: center;
+        }
+        
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .sidebar li {
+            margin-bottom: 10px;
+        }
+        
+        .sidebar a {
+            display: block;
+            padding: 12px 16px;
+            color: #333;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        
+        .sidebar a:hover {
+            background-color: #f8f9fa;
+            color: #1a73e8;
+        }
+        
+        .sidebar a.active {
+            background-color: #e3f2fd;
+            color: #1a73e8;
+            font-weight: 500;
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .header {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            color: #333;
+            margin: 0;
+            font-size: 24px;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .user-avatar {
+            width: 48px;
+            height: 48px;
+            background-color: #e3f2fd;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: #1a73e8;
+            font-weight: 500;
+        }
+        
+        .user-details {
+            text-align: right;
+        }
+        
+        .user-name {
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .user-type {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .logout-btn {
+            background: none;
+            border: none;
+            color: #d32f2f;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 0;
+            text-decoration: underline;
+        }
+        
+        .logout-btn:hover {
+            color: #c62828;
+        }
+        
+        /* 个人资料区域 */
+        .profile-content {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+        
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .profile-avatar {
+            position: relative;
+        }
+        
+        .avatar-image {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background-color: #e3f2fd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            color: #1a73e8;
+            font-weight: 500;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        
+        .avatar-image:hover {
+            transform: scale(1.05);
+        }
+        
+        .avatar-upload-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(0,0,0,0.5);
+            color: white;
+            text-align: center;
+            padding: 8px;
+            font-size: 12px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            cursor: pointer;
+        }
+        
+        .profile-avatar:hover .avatar-upload-overlay {
+            opacity: 1;
+        }
+        
+        .avatar-upload-input {
+            display: none;
+        }
+        
+        .profile-basic-info h2 {
+            margin: 0 0 10px 0;
+            color: #333;
+            font-size: 24px;
+        }
+        
+        .profile-basic-info p {
+            margin: 0;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        /* 标签页导航 */
+        .profile-tabs {
+            display: flex;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 20px;
+        }
+        
+        .tab-btn {
+            padding: 12px 24px;
+            border: none;
+            background-color: transparent;
+            cursor: pointer;
+            font-size: 16px;
+            color: #666;
+            position: relative;
+            transition: color 0.3s;
+        }
+        
+        .tab-btn:hover {
+            color: #1a73e8;
+        }
+        
+        .tab-btn.active {
+            color: #1a73e8;
+        }
+        
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background-color: #1a73e8;
+        }
+        
+        /* 标签页内容 */
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* 表单样式 */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #1a73e8;
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .form-note {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .form-section {
+            margin-bottom: 30px;
+        }
+        
+        .form-section h3 {
+            margin: 0 0 20px 0;
+            color: #333;
+            font-size: 18px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background-color 0.3s;
+            text-decoration: none;
+        }
+        
+        .btn-primary {
+            background-color: #1a73e8;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #1557b0;
+        }
+        
+        .btn-secondary {
+            background-color: #f8f9fa;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #e9ecef;
+        }
+        
+        .btn-danger {
+            background-color: #d32f2f;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #c62828;
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+        
+        /* 安全设置样式 */
+        .security-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .security-item:last-child {
+            border-bottom: none;
+        }
+        
+        .security-info h4 {
+            margin: 0 0 5px 0;
+            color: #333;
+            font-size: 16px;
+        }
+        
+        .security-info p {
+            margin: 0;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        /* 预约设置样式 */
+        .preference-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .preference-info h4 {
+            margin: 0 0 5px 0;
+            color: #333;
+            font-size: 16px;
+        }
+        
+        .preference-info p {
+            margin: 0;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        /* 联系方式样式 */
+        .contact-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .contact-item:last-child {
+            border-bottom: none;
+        }
+        
+        .contact-info h4 {
+            margin: 0 0 5px 0;
+            color: #333;
+            font-size: 16px;
+        }
+        
+        .contact-info p {
+            margin: 0;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        /* 开关按钮样式 */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 30px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .toggle-slider {
+            background-color: #1a73e8;
+        }
+        
+        input:focus + .toggle-slider {
+            box-shadow: 0 0 1px #1a73e8;
+        }
+        
+        input:checked + .toggle-slider:before {
+            transform: translateX(30px);
+        }
+        
+        /* 模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .modal-header h2 {
+            margin: 0;
+            color: #333;
+            font-size: 20px;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        
+        .close-btn:hover {
+            background-color: #f8f9fa;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .profile-container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                margin-bottom: 20px;
+            }
+            
+            .header {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px;
+            }
+            
+            .user-info {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .user-details {
+                text-align: center;
+            }
+            
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .profile-tabs {
+                overflow-x: auto;
+                flex-wrap: nowrap;
+            }
+            
+            .tab-btn {
+                white-space: nowrap;
+                padding: 12px 16px;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-actions {
+                flex-direction: column;
+            }
+            
+            .security-item,
+            .contact-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .modal-content {
+                width: 95%;
+                margin: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="profile-container">
+        <!-- 侧边栏导航 -->
+        <aside class="sidebar">
+            <h3>患者菜单</h3>
+            <ul>
+                <li><a href="dashboard.html">仪表盘</a></li>
+                <li><a href="appointments.html">预约管理</a></li>
+                <li><a href="medical-records.html">医疗记录</a></li>
+                <li><a href="image-requests.html">影像请求</a></li>
+                <li><a href="profile.html" class="active">个人中心</a></li>
+                <li><a href="login.html" id="logoutBtn">退出登录</a></li>
+            </ul>
+        </aside>
+        
+        <!-- 主内容区域 -->
+        <main class="main-content">
+            <div class="header">
+                <h1>个人中心</h1>
+                <div class="user-info">
+                    <div class="user-avatar">患</div>
+                    <div class="user-details">
+                        <div class="user-name">张三</div>
+                        <div class="user-type">普通患者</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 个人资料内容 -->
+            <div class="profile-content">
+                <!-- 个人资料头部 -->
+                <div class="profile-header">
+                    <div class="profile-avatar">
+                        <div class="avatar-image">患</div>
+                        <div class="avatar-upload-overlay">更换头像</div>
+                        <input type="file" id="avatarUploadInput" class="avatar-upload-input" accept="image/*">
+                    </div>
+                    <div class="profile-basic-info">
+                        <h2>张三</h2>
+                        <p>患者ID：PT20230001</p>
+                        <p>注册时间：2023-09-15</p>
+                    </div>
+                </div>
+                
+                <!-- 标签页导航 -->
+                <div class="profile-tabs">
+                    <button class="tab-btn active" data-tab="basic-info">基本信息</button>
+                    <button class="tab-btn" data-tab="security-settings">账户安全</button>
+                    <button class="tab-btn" data-tab="appointment-settings">预约设置</button>
+                    <button class="tab-btn" data-tab="contact-info">联系人信息</button>
+                </div>
+                
+                <!-- 基本信息标签页 -->
+                <div class="tab-content active" id="basic-info">
+                    <form id="basicInfoForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="realName">真实姓名</label>
+                                <input type="text" id="realName" value="张三" readonly>
+                                <div class="form-note">姓名不可修改</div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="gender">性别</label>
+                                <select id="gender">
+                                    <option value="male" selected>男</option>
+                                    <option value="female">女</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="birthDate">出生日期</label>
+                                <input type="date" id="birthDate" value="1985-05-15">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="patientType">患者类型</label>
+                                <select id="patientType">
+                                    <option value="adult" selected>成年人</option>
+                                    <option value="elderly">老年人</option>
+                                    <option value="child">儿童</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="idNumber">身份证号</label>
+                            <input type="text" id="idNumber" value="110101198505151234" readonly>
+                            <div class="form-note">身份证号不可修改</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="phone">手机号码</label>
+                            <input type="tel" id="phone" value="13800138000">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email">电子邮箱</label>
+                            <input type="email" id="email" value="zhangsan@example.com">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="address">联系地址</label>
+                            <textarea id="address">北京市朝阳区建国路88号</textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="allergy">药物过敏史</label>
+                            <textarea id="allergy">青霉素过敏</textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="medicalHistory">既往病史</label>
+                            <textarea id="medicalHistory">高血压2年，规律服用降压药物</textarea>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="button" id="editBasicInfoBtn" class="btn btn-primary">编辑信息</button>
+                            <button type="submit" id="saveBasicInfoBtn" class="btn btn-primary" style="display: none;">保存信息</button>
+                            <button type="button" id="cancelEditBtn" class="btn btn-secondary" style="display: none;">取消</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- 账户安全标签页 -->
+                <div class="tab-content" id="security-settings">
+                    <div class="security-item">
+                        <div class="security-info">
+                            <h4>登录密码</h4>
+                            <p>上次修改时间：2023-10-01</p>
+                        </div>
+                        <button class="btn btn-primary" id="changePasswordBtn">修改密码</button>
+                    </div>
+                    
+                    <div class="security-item">
+                        <div class="security-info">
+                            <h4>手机验证</h4>
+                            <p>已验证：138****8000</p>
+                        </div>
+                        <button class="btn btn-secondary" id="verifyPhoneBtn">更换手机号</button>
+                    </div>
+                    
+                    <div class="security-item">
+                        <div class="security-info">
+                            <h4>邮箱验证</h4>
+                            <p>已验证：zhangs****example.com</p>
+                        </div>
+                        <button class="btn btn-secondary" id="verifyEmailBtn">更换邮箱</button>
+                    </div>
+                    
+                    <div class="security-item">
+                        <div class="security-info">
+                            <h4>登录设备管理</h4>
+                            <p>管理已登录的设备和会话</p>
+                        </div>
+                        <button class="btn btn-secondary" id="manageDevicesBtn">管理设备</button>
+                    </div>
+                    
+                    <div class="security-item">
+                        <div class="security-info">
+                            <h4>账号注销</h4>
+                            <p>注销后无法恢复，请谨慎操作</p>
+                        </div>
+                        <button class="btn btn-danger" id="deleteAccountBtn">注销账号</button>
+                    </div>
+                </div>
+                
+                <!-- 预约设置标签页 -->
+                <div class="tab-content" id="appointment-settings">
+                    <div class="form-section">
+                        <h3>通知偏好</h3>
+                        
+                        <div class="preference-item">
+                            <div class="preference-info">
+                                <h4>短信通知</h4>
+                                <p>接收预约提醒、取消通知等短信</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="smsNotification" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="preference-item">
+                            <div class="preference-info">
+                                <h4>邮件通知</h4>
+                                <p>接收预约详情、报告等邮件</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="emailNotification" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="preference-item">
+                            <div class="preference-info">
+                                <h4>提前提醒</h4>
+                                <p>预约前24小时接收提醒</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="advanceReminder" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h3>预约偏好</h3>
+                        
+                        <div class="form-group">
+                            <label for="preferredDepartment">偏好科室</label>
+                            <select id="preferredDepartment">
+                                <option value="">不设置</option>
+                                <option value="internal">内科</option>
+                                <option value="surgery">外科</option>
+                                <option value="pediatrics">儿科</option>
+                                <option value="obstetrics">妇产科</option>
+                                <option value="dermatology">皮肤科</option>
+                                <option value="ophthalmology">眼科</option>
+                                <option value="ENT">耳鼻喉科</option>
+                                <option value="neurology">神经内科</option>
+                                <option value="psychiatry">精神心理科</option>
+                                <option value="orthopedics">骨科</option>
+                                <option value="cardiology">心血管内科</option>
+                                <option value="gastroenterology">消化内科</option>
+                                <option value="respiratory">呼吸内科</option>
+                                <option value="endocrinology">内分泌科</option>
+                                <option value="urology">泌尿外科</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="preferredTime">偏好就诊时间</label>
+                            <select id="preferredTime">
+                                <option value="">不设置</option>
+                                <option value="morning">上午 (8:00-12:00)</option>
+                                <option value="afternoon">下午 (13:30-17:30)</option>
+                                <option value="evening">晚上 (18:00-20:00)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" id="saveSettingsBtn" class="btn btn-primary">保存设置</button>
+                    </div>
+                </div>
+                
+                <!-- 联系人信息标签页 -->
+                <div class="tab-content" id="contact-info">
+                    <div class="contact-item">
+                        <div class="contact-info">
+                            <h4>紧急联系人</h4>
+                            <p>李四 (13900139000)</p>
+                            <p>关系：配偶</p>
+                        </div>
+                        <button class="btn btn-secondary" id="editEmergencyContactBtn">编辑</button>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <div class="contact-info">
+                            <h4>医保信息</h4>
+                            <p>社保卡号：110101198505151234</p>
+                            <p>医保类型：城镇职工基本医疗保险</p>
+                        </div>
+                        <button class="btn btn-secondary" id="editInsuranceBtn">编辑</button>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <div class="contact-info">
+                            <h4>监护人信息</h4>
+                            <p>（仅儿童和部分老年患者需要填写）</p>
+                        </div>
+                        <button class="btn btn-secondary" id="editGuardianBtn">添加/编辑</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- 修改密码模态框 -->
+    <div id="changePasswordModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>修改密码</h2>
+                <button class="close-btn" id="closePasswordModalBtn">&times;</button>
+            </div>
+            
+            <form id="changePasswordForm">
+                <div class="form-group">
+                    <label for="currentPassword">当前密码</label>
+                    <input type="password" id="currentPassword" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="newPassword">新密码</label>
+                    <input type="password" id="newPassword" required>
+                    <div class="form-note">密码长度至少8位，包含字母和数字</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="confirmPassword">确认新密码</label>
+                    <input type="password" id="confirmPassword" required>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" id="cancelPasswordBtn" class="btn btn-secondary">取消</button>
+                    <button type="submit" id="submitPasswordBtn" class="btn btn-primary">确认修改</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- 确认模态框 -->
+    <div id="confirmModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>确认操作</h2>
+                <button class="close-btn" id="closeConfirmModalBtn">&times;</button>
+            </div>
+            
+            <p id="confirmMessage">您确定要执行此操作吗？</p>
+            
+            <div class="form-actions">
+                <button type="button" id="cancelConfirmBtn" class="btn btn-secondary">取消</button>
+                <button type="button" id="submitConfirmBtn" class="btn btn-primary">确认</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { showAlert, storage } from '../assets/js/utils.js';
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 验证用户登录状态
+            const userInfo = storage.get('userInfo');
+            if (!userInfo || !userInfo.patientType) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // 设置页面内容
+            setupPageContent(userInfo);
+
+            // 设置事件监听器
+            setupEventListeners();
+        });
+
+        // 设置页面内容
+        function setupPageContent(userInfo) {
+            // 更新用户信息显示
+            document.querySelector('.user-name').textContent = userInfo.realName || userInfo.username;
+            
+            // 更新用户类型显示
+            let userTypeText = '普通患者';
+            if (userInfo.patientType === 'elderly') {
+                userTypeText = '老年患者';
+            } else if (userInfo.patientType === 'child') {
+                userTypeText = '儿童患者';
+            }
+            document.querySelector('.user-type').textContent = userTypeText;
+            
+            // 更新个人资料信息
+            if (userInfo.realName) {
+                document.querySelector('.profile-basic-info h2').textContent = userInfo.realName;
+                document.getElementById('realName').value = userInfo.realName;
+            }
+            
+            if (userInfo.gender) {
+                document.getElementById('gender').value = userInfo.gender;
+            }
+            
+            if (userInfo.birthDate) {
+                document.getElementById('birthDate').value = userInfo.birthDate;
+            }
+            
+            if (userInfo.patientType) {
+                document.getElementById('patientType').value = userInfo.patientType;
+            }
+            
+            if (userInfo.phone) {
+                document.getElementById('phone').value = userInfo.phone;
+            }
+            
+            if (userInfo.email) {
+                document.getElementById('email').value = userInfo.email;
+            }
+            
+            if (userInfo.address) {
+                document.getElementById('address').value = userInfo.address;
+            }
+        }
+
+        // 设置事件监听器
+        function setupEventListeners() {
+            // 退出登录按钮
+            document.getElementById('logoutBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                storage.remove('userInfo');
+                showAlert('success', '退出成功！');
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 1000);
+            });
+
+            // 标签页切换
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // 移除所有按钮的active类
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    // 为当前按钮添加active类
+                    this.classList.add('active');
+                    // 获取当前标签页ID
+                    const tabId = this.getAttribute('data-tab');
+                    // 隐藏所有标签页内容
+                    document.querySelectorAll('.tab-content').forEach(content => {
+                        content.classList.remove('active');
+                    });
+                    // 显示当前标签页内容
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+
+            // 头像上传
+            document.querySelector('.profile-avatar').addEventListener('click', function() {
+                document.getElementById('avatarUploadInput').click();
+            });
+            
+            document.getElementById('avatarUploadInput').addEventListener('change', function() {
+                if (this.files && this.files[0]) {
+                    const file = this.files[0];
+                    // 检查文件类型
+                    if (!file.type.match('image.*')) {
+                        showAlert('error', '请上传图片文件！');
+                        return;
+                    }
+                    
+                    // 检查文件大小
+                    if (file.size > 5 * 1024 * 1024) {
+                        showAlert('error', '图片大小不能超过5MB！');
+                        return;
+                    }
+                    
+                    // 模拟上传操作
+                    showAlert('info', '正在上传头像...');
+                    
+                    // 实际项目中，这里会发送文件到服务器
+                    setTimeout(() => {
+                        // 模拟更新头像
+                        const avatarImage = document.querySelector('.avatar-image');
+                        avatarImage.textContent = '';
+                        
+                        const img = document.createElement('img');
+                        img.src = URL.createObjectURL(file);
+                        img.style.width = '100%';
+                        img.style.height = '100%';
+                        img.style.objectFit = 'cover';
+                        
+                        avatarImage.appendChild(img);
+                        
+                        showAlert('success', '头像上传成功！');
+                    }, 1000);
+                }
+            });
+
+            // 基本信息编辑
+            document.getElementById('editBasicInfoBtn').addEventListener('click', function() {
+                // 启用表单字段
+                document.querySelectorAll('#basicInfoForm input:not([readonly]), #basicInfoForm select, #basicInfoForm textarea').forEach(field => {
+                    field.removeAttribute('disabled');
+                });
+                
+                // 隐藏编辑按钮，显示保存和取消按钮
+                this.style.display = 'none';
+                document.getElementById('saveBasicInfoBtn').style.display = 'inline-block';
+                document.getElementById('cancelEditBtn').style.display = 'inline-block';
+            });
+            
+            document.getElementById('cancelEditBtn').addEventListener('click', function() {
+                // 重置表单
+                document.getElementById('basicInfoForm').reset();
+                
+                // 禁用表单字段
+                document.querySelectorAll('#basicInfoForm input:not([readonly]), #basicInfoForm select, #basicInfoForm textarea').forEach(field => {
+                    field.setAttribute('disabled', 'disabled');
+                });
+                
+                // 显示编辑按钮，隐藏保存和取消按钮
+                document.getElementById('editBasicInfoBtn').style.display = 'inline-block';
+                document.getElementById('saveBasicInfoBtn').style.display = 'none';
+                document.getElementById('cancelEditBtn').style.display = 'none';
+            });
+            
+            document.getElementById('basicInfoForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // 验证表单
+                const phone = document.getElementById('phone').value;
+                const email = document.getElementById('email').value;
+                
+                if (!phone) {
+                    showAlert('error', '请输入手机号码！');
+                    return;
+                }
+                
+                if (!email) {
+                    showAlert('error', '请输入电子邮箱！');
+                    return;
+                }
+                
+                // 模拟保存操作
+                showAlert('info', '正在保存信息...');
+                
+                // 实际项目中，这里会发送数据到服务器
+                setTimeout(() => {
+                    // 禁用表单字段
+                    document.querySelectorAll('#basicInfoForm input:not([readonly]), #basicInfoForm select, #basicInfoForm textarea').forEach(field => {
+                        field.setAttribute('disabled', 'disabled');
+                    });
+                    
+                    // 显示编辑按钮，隐藏保存和取消按钮
+                    document.getElementById('editBasicInfoBtn').style.display = 'inline-block';
+                    document.getElementById('saveBasicInfoBtn').style.display = 'none';
+                    document.getElementById('cancelEditBtn').style.display = 'none';
+                    
+                    showAlert('success', '个人信息保存成功！');
+                }, 1000);
+            });
+
+            // 账户安全操作
+            document.getElementById('changePasswordBtn').addEventListener('click', function() {
+                document.getElementById('changePasswordModal').style.display = 'flex';
+            });
+            
+            document.getElementById('verifyPhoneBtn').addEventListener('click', function() {
+                showAlert('info', '即将打开更换手机号流程...');
+                // 实际项目中，这里会打开更换手机号的模态框或页面
+            });
+            
+            document.getElementById('verifyEmailBtn').addEventListener('click', function() {
+                showAlert('info', '即将打开更换邮箱流程...');
+                // 实际项目中，这里会打开更换邮箱的模态框或页面
+            });
+            
+            document.getElementById('manageDevicesBtn').addEventListener('click', function() {
+                showAlert('info', '即将打开设备管理页面...');
+                // 实际项目中，这里会打开设备管理页面
+            });
+            
+            document.getElementById('deleteAccountBtn').addEventListener('click', function() {
+                document.getElementById('confirmMessage').textContent = '您确定要注销账号吗？注销后数据将无法恢复！';
+                document.getElementById('confirmModal').style.display = 'flex';
+            });
+
+            // 保存设置
+            document.getElementById('saveSettingsBtn').addEventListener('click', function() {
+                // 模拟保存操作
+                showAlert('info', '正在保存设置...');
+                
+                // 实际项目中，这里会发送数据到服务器
+                setTimeout(() => {
+                    showAlert('success', '设置保存成功！');
+                }, 800);
+            });
+
+            // 联系人信息编辑
+            document.getElementById('editEmergencyContactBtn').addEventListener('click', function() {
+                showAlert('info', '即将打开编辑紧急联系人页面...');
+                // 实际项目中，这里会打开编辑紧急联系人的模态框
+            });
+            
+            document.getElementById('editInsuranceBtn').addEventListener('click', function() {
+                showAlert('info', '即将打开编辑医保信息页面...');
+                // 实际项目中，这里会打开编辑医保信息的模态框
+            });
+            
+            document.getElementById('editGuardianBtn').addEventListener('click', function() {
+                showAlert('info', '即将打开编辑监护人信息页面...');
+                // 实际项目中，这里会打开编辑监护人信息的模态框
+            });
+
+            // 修改密码模态框操作
+            document.getElementById('closePasswordModalBtn').addEventListener('click', function() {
+                document.getElementById('changePasswordModal').style.display = 'none';
+            });
+            
+            document.getElementById('cancelPasswordBtn').addEventListener('click', function() {
+                document.getElementById('changePasswordModal').style.display = 'none';
+            });
+            
+            document.getElementById('changePasswordForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const currentPassword = document.getElementById('currentPassword').value;
+                const newPassword = document.getElementById('newPassword').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+                
+                // 验证密码
+                if (!currentPassword || !newPassword || !confirmPassword) {
+                    showAlert('error', '请填写所有密码字段！');
+                    return;
+                }
+                
+                if (newPassword !== confirmPassword) {
+                    showAlert('error', '两次输入的新密码不一致！');
+                    return;
+                }
+                
+                if (newPassword.length < 8 || !/[a-zA-Z]/.test(newPassword) || !/\d/.test(newPassword)) {
+                    showAlert('error', '新密码必须至少8位，包含字母和数字！');
+                    return;
+                }
+                
+                // 模拟修改密码操作
+                showAlert('info', '正在修改密码...');
+                
+                // 实际项目中，这里会发送请求到服务器
+                setTimeout(() => {
+                    document.getElementById('changePasswordModal').style.display = 'none';
+                    document.getElementById('changePasswordForm').reset();
+                    showAlert('success', '密码修改成功！');
+                }, 1000);
+            });
+
+            // 确认模态框操作
+            document.getElementById('closeConfirmModalBtn').addEventListener('click', function() {
+                document.getElementById('confirmModal').style.display = 'none';
+            });
+            
+            document.getElementById('cancelConfirmBtn').addEventListener('click', function() {
+                document.getElementById('confirmModal').style.display = 'none';
+            });
+            
+            document.getElementById('submitConfirmBtn').addEventListener('click', function() {
+                // 模拟确认操作
+                showAlert('info', '正在执行操作...');
+                
+                // 实际项目中，这里会发送请求到服务器
+                setTimeout(() => {
+                    document.getElementById('confirmModal').style.display = 'none';
+                    showAlert('success', '操作已完成！');
+                }, 1000);
+            });
+
+            // 点击模态框外部关闭
+            window.addEventListener('click', function(event) {
+                const passwordModal = document.getElementById('changePasswordModal');
+                const confirmModal = document.getElementById('confirmModal');
+                
+                if (event.target === passwordModal) {
+                    passwordModal.style.display = 'none';
+                } else if (event.target === confirmModal) {
+                    confirmModal.style.display = 'none';
+                }
+            });
+        }
+    </script>
+</body>
+</html>

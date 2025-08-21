@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>医生工作台 - 医疗管理系统</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* 医生工作台特定样式 */
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        
+        .page-header {
+            margin-bottom: 20px;
+        }
+        
+        .page-header h1 {
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .page-header p {
+            color: #666;
+            margin-top: 0;
+        }
+        
+        /* 统计卡片区域 */
+        .stats-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 15px;
+            font-size: 24px;
+            color: white;
+        }
+        
+        .stat-icon.appointments {
+            background-color: #1a73e8;
+        }
+        
+        .stat-icon.patients {
+            background-color: #34a853;
+        }
+        
+        .stat-icon.images {
+            background-color: #ea4335;
+        }
+        
+        .stat-icon.records {
+            background-color: #fbbc05;
+        }
+        
+        .stat-info h3 {
+            margin: 0;
+            font-size: 18px;
+            color: #333;
+        }
+        
+        .stat-info .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin: 5px 0;
+        }
+        
+        .stat-info .stat-desc {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        /* 今日预约区域 */
+        .today-appointments {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .section-header h2 {
+            margin: 0;
+            color: #333;
+        }
+        
+        .section-header .view-all {
+            color: #1a73e8;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        
+        .appointment-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .appointment-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .appointment-item:last-child {
+            border-bottom: none;
+        }
+        
+        .appointment-time {
+            text-align: center;
+            margin-right: 20px;
+            min-width: 80px;
+        }
+        
+        .appointment-time .time {
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .appointment-time .status {
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 12px;
+            margin-top: 5px;
+            display: inline-block;
+        }
+        
+        .appointment-time .status.upcoming {
+            background-color: #e8f0fe;
+            color: #1a73e8;
+        }
+        
+        .appointment-time .status.completed {
+            background-color: #e8f5e8;
+            color: #34a853;
+        }
+        
+        .appointment-time .status.cancelled {
+            background-color: #ffebee;
+            color: #ea4335;
+        }
+        
+        .appointment-patient {
+            flex: 1;
+        }
+        
+        .appointment-patient h4 {
+            margin: 0;
+            color: #333;
+        }
+        
+        .appointment-patient p {
+            margin: 5px 0;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .appointment-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        
+        .btn-primary {
+            background-color: #1a73e8;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #1557b0;
+        }
+        
+        .btn-secondary {
+            background-color: #f8f9fa;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #e9ecef;
+        }
+        
+        .btn-danger {
+            background-color: #d32f2f;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #c62828;
+        }
+        
+        /* 图表和待办事项区域 */
+        .dashboard-sections {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        
+        /* 图表区域 */
+        .chart-section {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 25px;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 250px;
+            margin-top: 20px;
+        }
+        
+        /* 待办事项区域 */
+        .todo-section {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 25px;
+        }
+        
+        .todo-list {
+            margin-top: 15px;
+        }
+        
+        .todo-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .todo-item:last-child {
+            border-bottom: none;
+        }
+        
+        .todo-checkbox {
+            margin-right: 15px;
+        }
+        
+        .todo-content {
+            flex: 1;
+        }
+        
+        .todo-content h4 {
+            margin: 0;
+            color: #333;
+            font-size: 16px;
+        }
+        
+        .todo-content p {
+            margin: 5px 0;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .add-todo {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .add-todo input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 1024px) {
+            .dashboard-sections {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard-container {
+                flex-direction: column;
+            }
+            
+            .stats-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .appointment-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .appointment-time {
+                text-align: left;
+                margin-right: 0;
+            }
+            
+            .appointment-actions {
+                align-self: flex-end;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- 侧边栏导航 -->
+        <aside class="sidebar">
+            <h3>医生菜单</h3>
+            <ul>
+                <li><a href="doctor-dashboard.html" class="active">工作台</a></li>
+                <li><a href="doctor-profile.html">个人中心</a></li>
+                <li><a href="doctor-appointments.html">预约管理</a></li>
+                <li><a href="doctor-patient-records.html">患者记录</a></li>
+                <li><a href="doctor-medical-images.html">影像管理</a></li>
+                <li><a href="login.html" id="logoutBtn">退出登录</a></li>
+            </ul>
+        </aside>
+        
+        <!-- 主内容区域 -->
+        <main class="main-content">
+            <div class="page-header">
+                <h1>医生工作台</h1>
+                <p>欢迎回来，李四医生！今天是 <span id="currentDate"></span></p>
+            </div>
+            
+            <!-- 统计卡片 -->
+            <div class="stats-cards">
+                <div class="stat-card">
+                    <div class="stat-icon appointments">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>今日预约</h3>
+                        <div class="stat-value">8</div>
+                        <div class="stat-desc">已完成 3 / 待处理 5</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon patients">
+                        <i class="fas fa-user-injured"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>今日患者</h3>
+                        <div class="stat-value">12</div>
+                        <div class="stat-desc">新增 3 / 复诊 9</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon images">
+                        <i class="fas fa-x-ray"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>待查看影像</h3>
+                        <div class="stat-value">5</div>
+                        <div class="stat-desc">CT 2 / MRI 3</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon records">
+                        <i class="fas fa-file-medical-alt"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>待完善病历</h3>
+                        <div class="stat-value">4</div>
+                        <div class="stat-desc">今日需要完成</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 今日预约 -->
+            <div class="today-appointments">
+                <div class="section-header">
+                    <h2>今日预约</h2>
+                    <a href="doctor-appointments.html" class="view-all">查看全部</a>
+                </div>
+                
+                <div class="appointment-list">
+                    <div class="appointment-item">
+                        <div class="appointment-time">
+                            <div class="time">09:00</div>
+                            <div class="status completed">已完成</div>
+                        </div>
+                        <div class="appointment-patient">
+                            <h4>张三</h4>
+                            <p>年龄：52岁 / 男</p>
+                            <p>症状：高血压复诊</p>
+                            <p>病历号：PAT2023001</p>
+                        </div>
+                        <div class="appointment-actions">
+                            <a href="doctor-patient-details.html?id=PAT2023001" class="btn btn-secondary">查看详情</a>
+                        </div>
+                    </div>
+                    
+                    <div class="appointment-item">
+                        <div class="appointment-time">
+                            <div class="time">10:00</div>
+                            <div class="status completed">已完成</div>
+                        </div>
+                        <div class="appointment-patient">
+                            <h4>王五</h4>
+                            <p>年龄：45岁 / 男</p>
+                            <p>症状：胃痛、消化不良</p>
+                            <p>病历号：PAT2023002</p>
+                        </div>
+                        <div class="appointment-actions">
+                            <a href="doctor-patient-details.html?id=PAT2023002" class="btn btn-secondary">查看详情</a>
+                        </div>
+                    </div>
+                    
+                    <div class="appointment-item">
+                        <div class="appointment-time">
+                            <div class="time">11:00</div>
+                            <div class="status completed">已完成</div>
+                        </div>
+                        <div class="appointment-patient">
+                            <h4>赵六</h4>
+                            <p>年龄：38岁 / 女</p>
+                            <p>症状：头痛、疲劳</p>
+                            <p>病历号：PAT2023003</p>
+                        </div>
+                        <div class="appointment-actions">
+                            <a href="doctor-patient-details.html?id=PAT2023003" class="btn btn-secondary">查看详情</a>
+                        </div>
+                    </div>
+                    
+                    <div class="appointment-item">
+                        <div class="appointment-time">
+                            <div class="time">14:00</div>
+                            <div class="status upcoming">待处理</div>
+                        </div>
+                        <div class="appointment-patient">
+                            <h4>孙七</h4>
+                            <p>年龄：62岁 / 男</p>
+                            <p>症状：糖尿病复诊</p>
+                            <p>病历号：PAT2023004</p>
+                        </div>
+                        <div class="appointment-actions">
+                            <a href="doctor-patient-details.html?id=PAT2023004" class="btn btn-primary">接诊</a>
+                            <a href="#" class="btn btn-secondary">详情</a>
+                        </div>
+                    </div>
+                    
+                    <div class="appointment-item">
+                        <div class="appointment-time">
+                            <div class="time">15:00</div>
+                            <div class="status upcoming">待处理</div>
+                        </div>
+                        <div class="appointment-patient">
+                            <h4>周八</h4>
+                            <p>年龄：50岁 / 女</p>
+                            <p>症状：胸闷、气短</p>
+                            <p>病历号：PAT2023005</p>
+                        </div>
+                        <div class="appointment-actions">
+                            <a href="doctor-patient-details.html?id=PAT2023005" class="btn btn-primary">接诊</a>
+                            <a href="#" class="btn btn-secondary">详情</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 图表和待办事项 -->
+            <div class="dashboard-sections">
+                <!-- 工作量图表 -->
+                <div class="chart-section">
+                    <h2>近7天工作量统计</h2>
+                    <div class="chart-container">
+                        <canvas id="workloadChart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- 待办事项 -->
+                <div class="todo-section">
+                    <h2>今日待办</h2>
+                    <div class="todo-list">
+                        <div class="todo-item">
+                            <input type="checkbox" class="todo-checkbox" checked title="勾选待办事项" aria-label="勾选待办事项">
+                            <div class="todo-content">
+                                <h4>完成张三的病历</h4>
+                                <p>截止时间：今日12:00</p>
+                            </div>
+                        </div>
+                        <div class="todo-item">
+                            <input type="checkbox" class="todo-checkbox" title="勾选待办事项" aria-label="勾选待办事项">
+                            <div class="todo-content">
+                                <h4>查看孙七的CT影像</h4>
+                                <p>截止时间：今日15:00</p>
+                            </div>
+                        </div>
+                        
+                        <div class="todo-item">
+                            <input type="checkbox" class="todo-checkbox" title="勾选待办事项" aria-label="勾选待办事项">
+                            <div class="todo-content">
+                                <h4>参与内科病例讨论</h4>
+                                <p>时间：明日10:00</p>
+                            </div>
+                        </div>
+                        
+                        <div class="todo-item">
+                            <input type="checkbox" class="todo-checkbox" title="勾选待办事项" aria-label="勾选待办事项">
+                            <div class="todo-content">
+                                <h4>更新患者随访记录</h4>
+                                <p>截止时间：今日下班前</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="add-todo">
+                        <input type="text" id="newTodoInput" placeholder="添加新的待办事项...">
+                        <button id="addTodoBtn" class="btn btn-primary">添加</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script type="module">
+        import { showAlert, storage } from '../assets/js/utils.js';
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 验证用户登录状态
+            const userInfo = storage.get('userInfo');
+            if (!userInfo || userInfo.userType !== 'doctor') {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // 设置当前日期
+            setCurrentDate();
+
+            // 初始化工作量图表
+            initWorkloadChart();
+
+            // 设置事件监听器
+            setupEventListeners();
+        });
+
+        // 设置当前日期
+        function setCurrentDate() {
+            const now = new Date();
+            const options = {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                weekday: 'long'
+            };
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('zh-CN', options);
+        }
+
+        // 初始化工作量图表
+        function initWorkloadChart() {
+            const ctx = document.getElementById('workloadChart').getContext('2d');
+            
+            // 近7天的数据
+            const labels = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+            const appointmentData = [6, 8, 5, 7, 9, 4, 3];
+            const patientData = [8, 10, 7, 9, 11, 5, 4];
+            
+            const chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: '预约数量',
+                            data: appointmentData,
+                            backgroundColor: 'rgba(26, 115, 232, 0.6)',
+                            borderColor: 'rgba(26, 115, 232, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: '实际接诊',
+                            data: patientData,
+                            backgroundColor: 'rgba(52, 168, 83, 0.6)',
+                            borderColor: 'rgba(52, 168, 83, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 2
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        }
+                    }
+                }
+            });
+        }
+
+        // 设置事件监听器
+        function setupEventListeners() {
+            // 添加待办事项
+            document.getElementById('addTodoBtn').addEventListener('click', function() {
+                addNewTodo();
+            });
+
+            // 按Enter键添加待办事项
+            document.getElementById('newTodoInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    addNewTodo();
+                }
+            });
+
+            // 退出登录
+            document.getElementById('logoutBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                storage.remove('userInfo');
+                showAlert('success', '退出成功！');
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 1000);
+            });
+
+            // 预约接诊按钮
+            const consultButtons = document.querySelectorAll('.appointment-actions .btn-primary');
+            consultButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    if (this.textContent.trim() === '接诊') {
+                        // 模拟接诊操作
+                        showAlert('info', '正在准备接诊...');
+                        // 实际项目中这里会跳转到接诊界面
+                    }
+                });
+            });
+        }
+
+        // 添加新的待办事项
+        function addNewTodo() {
+            const input = document.getElementById('newTodoInput');
+            const text = input.value.trim();
+            
+            if (text === '') {
+                showAlert('error', '请输入待办事项内容');
+                return;
+            }
+            
+            const todoList = document.querySelector('.todo-list');
+            
+            // 创建新的待办事项元素
+            const todoItem = document.createElement('div');
+            todoItem.className = 'todo-item';
+            
+            const now = new Date();
+            const timeStr = `添加时间：${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+            
+            todoItem.innerHTML = `
+                <input type="checkbox" class="todo-checkbox">
+                <div class="todo-content">
+                    <h4>${text}</h4>
+                    <p>${timeStr}</p>
+                </div>
+            `;
+            
+            // 添加到列表顶部
+            todoList.insertBefore(todoItem, todoList.firstChild);
+            
+            // 清空输入框
+            input.value = '';
+            
+            // 显示成功提示
+            showAlert('success', '待办事项已添加');
+        }
+    </script>
+    <script src="../assets/js/utils.js"></script>
+</body>
+</html>

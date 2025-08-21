@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>预约管理 - 医疗预约系统</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <style>
+        /* 预约管理页面特定样式 */
+        .appointments-container {
+            display: flex;
+            min-height: 100vh;
+            background-color: #f8f9fa;
+        }
+        
+        .sidebar {
+            width: 250px;
+            background-color: #fff;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+        
+        .sidebar h3 {
+            margin: 0 0 20px 0;
+            color: #333;
+            font-size: 20px;
+            text-align: center;
+        }
+        
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .sidebar li {
+            margin-bottom: 10px;
+        }
+        
+        .sidebar a {
+            display: block;
+            padding: 12px 16px;
+            color: #333;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        
+        .sidebar a:hover {
+            background-color: #f8f9fa;
+            color: #1a73e8;
+        }
+        
+        .sidebar a.active {
+            background-color: #e3f2fd;
+            color: #1a73e8;
+            font-weight: 500;
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .header {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            color: #333;
+            margin: 0;
+            font-size: 24px;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .user-avatar {
+            width: 48px;
+            height: 48px;
+            background-color: #e3f2fd;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: #1a73e8;
+            font-weight: 500;
+        }
+        
+        .user-details {
+            text-align: right;
+        }
+        
+        .user-name {
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .user-type {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .logout-btn {
+            background: none;
+            border: none;
+            color: #d32f2f;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 0;
+            text-decoration: underline;
+        }
+        
+        .logout-btn:hover {
+            color: #c62828;
+        }
+        
+        /* 搜索和筛选区域 */
+        .search-filter {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .search-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            align-items: end;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .form-group label {
+            font-size: 14px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .form-group input,
+        .form-group select {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #1a73e8;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background-color 0.3s;
+            text-decoration: none;
+        }
+        
+        .btn-primary {
+            background-color: #1a73e8;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #1557b0;
+        }
+        
+        .btn-secondary {
+            background-color: #f8f9fa;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #e9ecef;
+        }
+        
+        .btn-success {
+            background-color: #4caf50;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background-color: #45a049;
+        }
+        
+        .btn-danger {
+            background-color: #d32f2f;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #c62828;
+        }
+        
+        .search-actions {
+            display: flex;
+            gap: 10px;
+            grid-column: 1 / -1;
+        }
+        
+        /* 预约列表 */
+        .appointments-list {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .section-header h2 {
+            margin: 0;
+            color: #333;
+            font-size: 20px;
+        }
+        
+        .create-btn {
+            background-color: #1a73e8;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+        
+        .create-btn:hover {
+            background-color: #1557b0;
+        }
+        
+        /* 选项卡 */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 20px;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 14px;
+            color: #666;
+            position: relative;
+            white-space: nowrap;
+        }
+        
+        .tab.active {
+            color: #1a73e8;
+            font-weight: 500;
+        }
+        
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -11px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: #1a73e8;
+        }
+        
+        /* 预约表格 */
+        .table-container {
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th,
+        td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        th {
+            background-color: #f8f9fa;
+            font-weight: 500;
+            color: #333;
+        }
+        
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .status-pending {
+            background-color: #fff8e1;
+            color: #f57c00;
+        }
+        
+        .status-confirmed {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        .status-completed {
+            background-color: #e3f2fd;
+            color: #1565c0;
+        }
+        
+        .status-canceled {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+        
+        /* 分页控件 */
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        
+        .page-info {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .page-controls {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .page-btn {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            background-color: #fff;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .page-btn:hover:not(:disabled) {
+            background-color: #f8f9fa;
+            border-color: #1a73e8;
+            color: #1a73e8;
+        }
+        
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .page-btn.active {
+            background-color: #1a73e8;
+            color: white;
+            border-color: #1a73e8;
+        }
+        
+        /* 添加预约模态框 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .modal-header h2 {
+            margin: 0;
+            color: #333;
+            font-size: 20px;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        
+        .close-btn:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .appointments-container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                margin-bottom: 20px;
+            }
+            
+            .header {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px;
+            }
+            
+            .user-info {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .user-details {
+                text-align: center;
+            }
+            
+            .search-form {
+                grid-template-columns: 1fr;
+            }
+            
+            .search-actions {
+                flex-direction: column;
+            }
+            
+            .tabs {
+                justify-content: center;
+            }
+            
+            .pagination {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            
+            .modal-content {
+                width: 95%;
+                margin: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="appointments-container">
+        <!-- 侧边栏导航 -->
+        <aside class="sidebar">
+            <h3>患者菜单</h3>
+            <ul>
+                <li><a href="dashboard.html">仪表盘</a></li>
+                <li><a href="appointments.html" class="active">预约管理</a></li>
+                <li><a href="medical-records.html">医疗记录</a></li>
+                <li><a href="image-requests.html">影像请求</a></li>
+                <li><a href="profile.html">个人中心</a></li>
+                <li><a href="login.html" id="logoutBtn">退出登录</a></li>
+            </ul>
+        </aside>
+        
+        <!-- 主内容区域 -->
+        <main class="main-content">
+            <div class="header">
+                <h1>预约管理</h1>
+                <div class="user-info">
+                    <div class="user-avatar">患</div>
+                    <div class="user-details">
+                        <div class="user-name">张三</div>
+                        <div class="user-type">普通患者</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 搜索和筛选区域 -->
+            <div class="search-filter">
+                <form id="searchForm" class="search-form">
+                    <div class="form-group">
+                        <label for="doctorName">医生姓名</label>
+                        <input type="text" id="doctorName" placeholder="请输入医生姓名">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="department">科室</label>
+                        <select id="department">
+                            <option value="">全部科室</option>
+                            <option value="internal">内科</option>
+                            <option value="surgery">外科</option>
+                            <option value="pediatrics">儿科</option>
+                            <option value="obstetrics">妇产科</option>
+                            <option value="dermatology">皮肤科</option>
+                            <option value="ophthalmology">眼科</option>
+                            <option value="ENT">耳鼻喉科</option>
+                            <option value="neurology">神经内科</option>
+                            <option value="psychiatry">精神心理科</option>
+                            <option value="orthopedics">骨科</option>
+                            <option value="cardiology">心血管内科</option>
+                            <option value="gastroenterology">消化内科</option>
+                            <option value="respiratory">呼吸内科</option>
+                            <option value="endocrinology">内分泌科</option>
+                            <option value="urology">泌尿外科</option>
+                            <option value="radiology">放射科</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="date">预约日期</label>
+                        <input type="date" id="date">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="status">状态</label>
+                        <select id="status">
+                            <option value="">全部状态</option>
+                            <option value="pending">待确认</option>
+                            <option value="confirmed">已确认</option>
+                            <option value="completed">已完成</option>
+                            <option value="canceled">已取消</option>
+                        </select>
+                    </div>
+                    
+                    <div class="search-actions">
+                        <button type="submit" class="btn btn-primary">搜索</button>
+                        <button type="button" id="resetSearch" class="btn btn-secondary">重置</button>
+                        <button type="button" id="createAppointmentBtn" class="btn btn-success">添加预约</button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- 预约列表 -->
+            <div class="appointments-list">
+                <div class="section-header">
+                    <h2>我的预约</h2>
+                </div>
+                
+                <!-- 选项卡 -->
+                <div class="tabs">
+                    <button class="tab active" data-status="">全部</button>
+                    <button class="tab" data-status="pending">待确认</button>
+                    <button class="tab" data-status="confirmed">已确认</button>
+                    <button class="tab" data-status="completed">已完成</button>
+                    <button class="tab" data-status="canceled">已取消</button>
+                </div>
+                
+                <!-- 预约表格 -->
+                <div class="table-container">
+                    <table id="appointmentsTable">
+                        <thead>
+                            <tr>
+                                <th>预约编号</th>
+                                <th>医生姓名</th>
+                                <th>科室</th>
+                                <th>预约日期</th>
+                                <th>预约时间</th>
+                                <th>就诊地点</th>
+                                <th>状态</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>APT2023015</td>
+                                <td>李医生</td>
+                                <td>内科</td>
+                                <td>2023-11-25</td>
+                                <td>10:30</td>
+                                <td>内科门诊楼 3楼 305诊室</td>
+                                <td><span class="status-badge status-pending">待确认</span></td>
+                                <td>
+                                    <button class="btn btn-secondary view-appointment" data-id="APT2023015">查看</button>
+                                    <button class="btn btn-danger cancel-appointment" data-id="APT2023015">取消</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>APT2023016</td>
+                                <td>王医生</td>
+                                <td>影像科</td>
+                                <td>2023-11-28</td>
+                                <td>14:00</td>
+                                <td>影像楼 2楼 CT室</td>
+                                <td><span class="status-badge status-confirmed">已确认</span></td>
+                                <td>
+                                    <button class="btn btn-secondary view-appointment" data-id="APT2023016">查看</button>
+                                    <button class="btn btn-danger cancel-appointment" data-id="APT2023016">取消</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>APT2023014</td>
+                                <td>张医生</td>
+                                <td>全科</td>
+                                <td>2023-11-15</td>
+                                <td>09:00</td>
+                                <td>全科门诊楼 1楼 102诊室</td>
+                                <td><span class="status-badge status-completed">已完成</span></td>
+                                <td>
+                                    <button class="btn btn-secondary view-appointment" data-id="APT2023014">查看</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>APT2023013</td>
+                                <td>刘医生</td>
+                                <td>骨科</td>
+                                <td>2023-11-10</td>
+                                <td>15:30</td>
+                                <td>外科门诊楼 5楼 508诊室</td>
+                                <td><span class="status-badge status-canceled">已取消</span></td>
+                                <td>
+                                    <button class="btn btn-secondary view-appointment" data-id="APT2023013">查看</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>APT2023012</td>
+                                <td>陈医生</td>
+                                <td>心血管内科</td>
+                                <td>2023-11-05</td>
+                                <td>11:00</td>
+                                <td>内科门诊楼 7楼 703诊室</td>
+                                <td><span class="status-badge status-completed">已完成</span></td>
+                                <td>
+                                    <button class="btn btn-secondary view-appointment" data-id="APT2023012">查看</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- 分页控件 -->
+                <div class="pagination">
+                    <div class="page-info">显示 1-5 条，共 24 条记录</div>
+                    <div class="page-controls">
+                        <button class="page-btn" disabled>上一页</button>
+                        <button class="page-btn active">1</button>
+                        <button class="page-btn">2</button>
+                        <button class="page-btn">3</button>
+                        <button class="page-btn">4</button>
+                        <button class="page-btn">5</button>
+                        <button class="page-btn">下一页</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- 添加预约模态框 -->
+    <div id="createAppointmentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>添加新预约</h2>
+                <button class="close-btn" id="closeModalBtn">&times;</button>
+            </div>
+            
+            <form id="createAppointmentForm">
+                <div class="form-group">
+                    <label for="appointmentDepartment">科室</label>
+                    <select id="appointmentDepartment" required>
+                        <option value="">请选择科室</option>
+                        <option value="internal">内科</option>
+                        <option value="surgery">外科</option>
+                        <option value="pediatrics">儿科</option>
+                        <option value="obstetrics">妇产科</option>
+                        <option value="dermatology">皮肤科</option>
+                        <option value="ophthalmology">眼科</option>
+                        <option value="ENT">耳鼻喉科</option>
+                        <option value="neurology">神经内科</option>
+                        <option value="psychiatry">精神心理科</option>
+                        <option value="orthopedics">骨科</option>
+                        <option value="cardiology">心血管内科</option>
+                        <option value="gastroenterology">消化内科</option>
+                        <option value="respiratory">呼吸内科</option>
+                        <option value="endocrinology">内分泌科</option>
+                        <option value="urology">泌尿外科</option>
+                        <option value="radiology">放射科</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="appointmentDoctor">医生</label>
+                    <select id="appointmentDoctor" required>
+                        <option value="">请先选择科室</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="appointmentDate">预约日期</label>
+                    <input type="date" id="appointmentDate" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="appointmentTime">预约时间</label>
+                    <select id="appointmentTime" required>
+                        <option value="">请选择时间段</option>
+                        <option value="08:00">08:00-08:30</option>
+                        <option value="08:30">08:30-09:00</option>
+                        <option value="09:00">09:00-09:30</option>
+                        <option value="09:30">09:30-10:00</option>
+                        <option value="10:00">10:00-10:30</option>
+                        <option value="10:30">10:30-11:00</option>
+                        <option value="11:00">11:00-11:30</option>
+                        <option value="13:30">13:30-14:00</option>
+                        <option value="14:00">14:00-14:30</option>
+                        <option value="14:30">14:30-15:00</option>
+                        <option value="15:00">15:00-15:30</option>
+                        <option value="15:30">15:30-16:00</option>
+                        <option value="16:00">16:00-16:30</option>
+                        <option value="16:30">16:30-17:00</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="appointmentReason">就诊原因</label>
+                    <textarea id="appointmentReason" rows="3" placeholder="请简要描述您的症状或就诊需求" required></textarea>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" id="cancelCreateBtn" class="btn btn-secondary">取消</button>
+                    <button type="submit" class="btn btn-primary">提交预约</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        import { showAlert, storage } from '../assets/js/utils.js';
+
+        // 模拟科室和医生数据
+        const departmentDoctors = {
+            'internal': [
+                { id: 'doc001', name: '李医生 - 普通内科' },
+                { id: 'doc002', name: '张医生 - 消化内科' },
+                { id: 'doc003', name: '王医生 - 呼吸内科' }
+            ],
+            'surgery': [
+                { id: 'doc004', name: '刘医生 - 普外科' },
+                { id: 'doc005', name: '陈医生 - 神经外科' }
+            ],
+            'pediatrics': [
+                { id: 'doc006', name: '赵医生 - 儿科' },
+                { id: 'doc007', name: '孙医生 - 儿童保健' }
+            ],
+            'radiology': [
+                { id: 'doc008', name: '周医生 - 影像科' },
+                { id: 'doc009', name: '吴医生 - CT室' }
+            ],
+            'cardiology': [
+                { id: 'doc010', name: '郑医生 - 心血管内科' }
+            ]
+        };
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 验证用户登录状态
+            const userInfo = storage.get('userInfo');
+            if (!userInfo || !userInfo.patientType) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // 设置页面内容
+            setupPageContent(userInfo);
+
+            // 设置事件监听器
+            setupEventListeners();
+        });
+
+        // 设置页面内容
+        function setupPageContent(userInfo) {
+            // 更新用户信息显示
+            document.querySelector('.user-name').textContent = userInfo.realName || userInfo.username;
+            
+            // 更新用户类型显示
+            let userTypeText = '普通患者';
+            if (userInfo.patientType === 'elderly') {
+                userTypeText = '老年患者';
+            } else if (userInfo.patientType === 'child') {
+                userTypeText = '儿童患者';
+            }
+            document.querySelector('.user-type').textContent = userTypeText;
+        }
+
+        // 设置事件监听器
+        function setupEventListeners() {
+            // 退出登录按钮
+            document.getElementById('logoutBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                storage.remove('userInfo');
+                showAlert('success', '退出成功！');
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 1000);
+            });
+
+            // 搜索表单提交
+            document.getElementById('searchForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                searchAppointments();
+            });
+
+            // 重置搜索
+            document.getElementById('resetSearch').addEventListener('click', function() {
+                document.getElementById('searchForm').reset();
+                searchAppointments();
+            });
+
+            // 选项卡切换
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    // 移除所有选项卡的active类
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    // 为当前选项卡添加active类
+                    this.classList.add('active');
+                    // 根据选项卡筛选预约
+                    const status = this.getAttribute('data-status');
+                    filterAppointmentsByStatus(status);
+                });
+            });
+
+            // 查看预约按钮
+            document.querySelectorAll('.view-appointment').forEach(button => {
+                button.addEventListener('click', function() {
+                    const appointmentId = this.getAttribute('data-id');
+                    viewAppointmentDetails(appointmentId);
+                });
+            });
+
+            // 取消预约按钮
+            document.querySelectorAll('.cancel-appointment').forEach(button => {
+                button.addEventListener('click', function() {
+                    const appointmentId = this.getAttribute('data-id');
+                    cancelAppointment(appointmentId);
+                });
+            });
+
+            // 分页按钮
+            document.querySelectorAll('.page-btn').forEach(button => {
+                if (!button.disabled && !button.classList.contains('active')) {
+                    button.addEventListener('click', function() {
+                        changePage(this.textContent.trim());
+                    });
+                }
+            });
+
+            // 添加预约按钮
+            document.getElementById('createAppointmentBtn').addEventListener('click', function() {
+                openCreateAppointmentModal();
+            });
+
+            // 关闭模态框按钮
+            document.getElementById('closeModalBtn').addEventListener('click', function() {
+                closeCreateAppointmentModal();
+            });
+
+            // 取消创建按钮
+            document.getElementById('cancelCreateBtn').addEventListener('click', function() {
+                closeCreateAppointmentModal();
+            });
+
+            // 创建预约表单提交
+            document.getElementById('createAppointmentForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                submitCreateAppointment();
+            });
+
+            // 科室选择变化
+            document.getElementById('appointmentDepartment').addEventListener('change', function() {
+                updateDoctorOptions(this.value);
+            });
+
+            // 点击模态框外部关闭
+            window.addEventListener('click', function(event) {
+                const modal = document.getElementById('createAppointmentModal');
+                if (event.target === modal) {
+                    closeCreateAppointmentModal();
+                }
+            });
+        }
+
+        // 搜索预约
+        function searchAppointments() {
+            const doctorName = document.getElementById('doctorName').value;
+            const department = document.getElementById('department').value;
+            const date = document.getElementById('date').value;
+            const status = document.getElementById('status').value;
+            
+            // 模拟搜索操作
+            showAlert('info', '正在搜索预约...');
+            
+            // 实际项目中，这里会发送搜索请求到服务器
+            setTimeout(() => {
+                showAlert('success', '搜索完成！');
+                // 在实际项目中，这里会根据搜索结果更新表格
+            }, 800);
+        }
+
+        // 根据状态筛选预约
+        function filterAppointmentsByStatus(status) {
+            // 模拟筛选操作
+            showAlert('info', `正在筛选${status ? status === 'pending' ? '待确认' : status === 'confirmed' ? '已确认' : status === 'completed' ? '已完成' : '已取消' : '全部'}预约...`);
+            
+            // 实际项目中，这里会发送筛选请求到服务器
+            setTimeout(() => {
+                showAlert('success', '筛选完成！');
+                // 在实际项目中，这里会根据筛选结果更新表格
+            }, 800);
+        }
+
+        // 查看预约详情
+        function viewAppointmentDetails(appointmentId) {
+            // 实际项目中，这里会跳转到预约详情页面或打开详情模态框
+            showAlert('info', `查看预约 ${appointmentId} 的详情`);
+            // 例如：window.location.href = `appointment-detail.html?id=${appointmentId}`;
+        }
+
+        // 取消预约
+        function cancelAppointment(appointmentId) {
+            if (confirm(`确定要取消预约 ${appointmentId} 吗？取消后可能影响您的预约信用记录。`)) {
+                // 模拟取消预约操作
+                showAlert('info', `正在取消预约 ${appointmentId}...`);
+                
+                // 实际项目中，这里会发送取消请求到服务器
+                setTimeout(() => {
+                    showAlert('success', `预约 ${appointmentId} 已成功取消`);
+                    // 在实际项目中，这里会刷新预约列表
+                }, 800);
+            }
+        }
+
+        // 更改页面
+        function changePage(pageNumber) {
+            // 模拟分页操作
+            showAlert('info', `正在加载第 ${pageNumber} 页...`);
+            
+            // 实际项目中，这里会发送分页请求到服务器
+            setTimeout(() => {
+                showAlert('success', `已加载第 ${pageNumber} 页`);
+                // 在实际项目中，这里会更新表格内容和分页控件
+            }, 800);
+        }
+
+        // 打开创建预约模态框
+        function openCreateAppointmentModal() {
+            const modal = document.getElementById('createAppointmentModal');
+            modal.style.display = 'flex';
+            // 重置表单
+            document.getElementById('createAppointmentForm').reset();
+            // 重置医生选择
+            const doctorSelect = document.getElementById('appointmentDoctor');
+            doctorSelect.innerHTML = '<option value="">请先选择科室</option>';
+            doctorSelect.disabled = true;
+        }
+
+        // 关闭创建预约模态框
+        function closeCreateAppointmentModal() {
+            const modal = document.getElementById('createAppointmentModal');
+            modal.style.display = 'none';
+        }
+
+        // 更新医生选项
+        function updateDoctorOptions(departmentId) {
+            const doctorSelect = document.getElementById('appointmentDoctor');
+            doctorSelect.innerHTML = '';
+            
+            if (departmentId && departmentDoctors[departmentId]) {
+                doctorSelect.disabled = false;
+                departmentDoctors[departmentId].forEach(doctor => {
+                    const option = document.createElement('option');
+                    option.value = doctor.id;
+                    option.textContent = doctor.name;
+                    doctorSelect.appendChild(option);
+                });
+            } else {
+                doctorSelect.innerHTML = '<option value="">请先选择科室</option>';
+                doctorSelect.disabled = true;
+            }
+        }
+
+        // 提交创建预约
+        function submitCreateAppointment() {
+            const department = document.getElementById('appointmentDepartment').value;
+            const doctor = document.getElementById('appointmentDoctor').value;
+            const date = document.getElementById('appointmentDate').value;
+            const time = document.getElementById('appointmentTime').value;
+            const reason = document.getElementById('appointmentReason').value;
+            
+            // 模拟提交预约操作
+            showAlert('info', '正在提交预约...');
+            
+            // 实际项目中，这里会发送创建请求到服务器
+            setTimeout(() => {
+                showAlert('success', '预约申请已提交，请等待医生确认！');
+                closeCreateAppointmentModal();
+                // 在实际项目中，这里会刷新预约列表
+            }, 1000);
+        }
+    </script>
+    <script src="../assets/js/utils.js"></script>
+</body>
+</html>

@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>影像请求 - 医疗预约系统</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <style>
+        /* 影像请求页面特定样式 */
+        .image-requests-container {
+            display: flex;
+            min-height: 100vh;
+            background-color: #f8f9fa;
+        }
+        
+        .sidebar {
+            width: 250px;
+            background-color: #fff;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+        
+        .sidebar h3 {
+            margin: 0 0 20px 0;
+            color: #333;
+            font-size: 20px;
+            text-align: center;
+        }
+        
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .sidebar li {
+            margin-bottom: 10px;
+        }
+        
+        .sidebar a {
+            display: block;
+            padding: 12px 16px;
+            color: #333;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        
+        .sidebar a:hover {
+            background-color: #f8f9fa;
+            color: #1a73e8;
+        }
+        
+        .sidebar a.active {
+            background-color: #e3f2fd;
+            color: #1a73e8;
+            font-weight: 500;
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .header {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            color: #333;
+            margin: 0;
+            font-size: 24px;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .user-avatar {
+            width: 48px;
+            height: 48px;
+            background-color: #e3f2fd;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: #1a73e8;
+            font-weight: 500;
+        }
+        
+        .user-details {
+            text-align: right;
+        }
+        
+        .user-name {
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .user-type {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .logout-btn {
+            background: none;
+            border: none;
+            color: #d32f2f;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 0;
+            text-decoration: underline;
+        }
+        
+        .logout-btn:hover {
+            color: #c62828;
+        }
+        
+        /* 搜索和筛选区域 */
+        .search-filter {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .search-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            align-items: end;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .form-group label {
+            font-size: 14px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .form-group input,
+        .form-group select {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #1a73e8;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background-color 0.3s;
+            text-decoration: none;
+        }
+        
+        .btn-primary {
+            background-color: #1a73e8;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #1557b0;
+        }
+        
+        .btn-secondary {
+            background-color: #f8f9fa;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #e9ecef;
+        }
+        
+        .btn-success {
+            background-color: #388e3c;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background-color: #2e7d32;
+        }
+        
+        .btn-warning {
+            background-color: #f57c00;
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background-color: #ef6c00;
+        }
+        
+        .btn-danger {
+            background-color: #d32f2f;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #c62828;
+        }
+        
+        .search-actions {
+            display: flex;
+            gap: 10px;
+            grid-column: 1 / -1;
+        }
+        
+        /* 影像请求列表 */
+        .image-requests-list {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .section-header h2 {
+            margin: 0;
+            color: #333;
+            font-size: 20px;
+        }
+        
+        /* 视图切换 */
+        .view-toggle {
+            display: flex;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        
+        .view-btn {
+            padding: 8px 16px;
+            border: none;
+            background-color: #fff;
+            cursor: pointer;
+            font-size: 14px;
+            color: #666;
+            transition: all 0.3s;
+        }
+        
+        .view-btn.active {
+            background-color: #1a73e8;
+            color: white;
+        }
+        
+        .view-btn:hover:not(.active) {
+            background-color: #f8f9fa;
+        }
+        
+        /* 请求卡片视图 */
+        .requests-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+        
+        .request-card {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+        
+        .request-card:hover {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transform: translateY(-3px);
+        }
+        
+        .request-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+        
+        .request-doctor {
+            font-weight: 600;
+            color: #333;
+            font-size: 18px;
+        }
+        
+        .request-status {
+            font-size: 14px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+        
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-approved {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .status-rejected {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .status-completed {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .request-info {
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .request-info strong {
+            color: #333;
+        }
+        
+        .request-reason {
+            font-size: 14px;
+            color: #333;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+        }
+        
+        .request-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .request-action-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background-color 0.3s;
+            text-decoration: none;
+        }
+        
+        /* 请求表格视图 */
+        .requests-table {
+            display: none;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th,
+        td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        th {
+            background-color: #f8f9fa;
+            font-weight: 500;
+            color: #333;
+        }
+        
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        /* 分页控件 */
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        
+        .page-info {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .page-controls {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .page-btn {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            background-color: #fff;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .page-btn:hover:not(:disabled) {
+            background-color: #f8f9fa;
+            border-color: #1a73e8;
+            color: #1a73e8;
+        }
+        
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .page-btn.active {
+            background-color: #1a73e8;
+            color: white;
+            border-color: #1a73e8;
+        }
+        
+        /* 影像请求详情模态框 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 30px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .modal-header h2 {
+            margin: 0;
+            color: #333;
+            font-size: 20px;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        
+        .close-btn:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .request-detail-info {
+            margin-bottom: 20px;
+        }
+        
+        .request-detail-row {
+            display: flex;
+            margin-bottom: 10px;
+        }
+        
+        .request-detail-label {
+            width: 120px;
+            font-weight: 500;
+            color: #666;
+        }
+        
+        .request-detail-value {
+            flex: 1;
+            color: #333;
+        }
+        
+        .request-detail-content {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        
+        .request-detail-content h3 {
+            margin: 0 0 15px 0;
+            color: #333;
+            font-size: 18px;
+        }
+        
+        .request-detail-content p {
+            line-height: 1.6;
+            color: #333;
+        }
+        
+        /* 确认模态框 */
+        .confirm-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .confirm-content {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 30px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        
+        .confirm-content h3 {
+            margin: 0 0 20px 0;
+            color: #333;
+            font-size: 18px;
+        }
+        
+        .confirm-content p {
+            margin: 0 0 20px 0;
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        .confirm-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        /* 文件上传区域 */
+        .file-upload {
+            background-color: #f8f9fa;
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .file-upload:hover {
+            border-color: #1a73e8;
+            background-color: #e3f2fd;
+        }
+        
+        .file-upload-icon {
+            font-size: 48px;
+            color: #ddd;
+            margin-bottom: 15px;
+        }
+        
+        .file-upload-text {
+            color: #666;
+            font-size: 16px;
+        }
+        
+        .file-upload-input {
+            display: none;
+        }
+        
+        .uploaded-files {
+            margin-top: 20px;
+        }
+        
+        .uploaded-files h4 {
+            margin: 0 0 15px 0;
+            color: #333;
+            font-size: 16px;
+        }
+        
+        .file-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        
+        .file-icon {
+            font-size: 24px;
+            color: #1a73e8;
+        }
+        
+        .file-name {
+            flex: 1;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .file-size {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .file-remove {
+            background: none;
+            border: none;
+            color: #d32f2f;
+            cursor: pointer;
+            font-size: 20px;
+            padding: 0;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .image-requests-container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                margin-bottom: 20px;
+            }
+            
+            .header {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px;
+            }
+            
+            .user-info {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .user-details {
+                text-align: center;
+            }
+            
+            .search-form {
+                grid-template-columns: 1fr;
+            }
+            
+            .search-actions {
+                flex-direction: column;
+            }
+            
+            .requests-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .request-actions {
+                flex-direction: column;
+            }
+            
+            .pagination {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            
+            .request-detail-row {
+                flex-direction: column;
+            }
+            
+            .request-detail-label {
+                width: auto;
+                margin-bottom: 5px;
+            }
+            
+            .confirm-actions {
+                flex-direction: column;
+            }
+            
+            .modal-content {
+                width: 95%;
+                margin: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="image-requests-container">
+        <!-- 侧边栏导航 -->
+        <aside class="sidebar">
+            <h3>患者菜单</h3>
+            <ul>
+                <li><a href="dashboard.html">仪表盘</a></li>
+                <li><a href="appointments.html">预约管理</a></li>
+                <li><a href="medical-records.html">医疗记录</a></li>
+                <li><a href="image-requests.html" class="active">影像请求</a></li>
+                <li><a href="profile.html">个人中心</a></li>
+                <li><a href="login.html" id="logoutBtn">退出登录</a></li>
+            </ul>
+        </aside>
+        
+        <!-- 主内容区域 -->
+        <main class="main-content">
+            <div class="header">
+                <h1>影像请求</h1>
+                <div class="user-info">
+                    <div class="user-avatar">患</div>
+                    <div class="user-details">
+                        <div class="user-name">张三</div>
+                        <div class="user-type">普通患者</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 搜索和筛选区域 -->
+            <div class="search-filter">
+                <form id="searchForm" class="search-form">
+                    <div class="form-group">
+                        <label for="doctorName">医生姓名</label>
+                        <input type="text" id="doctorName" placeholder="请输入医生姓名">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="requestStatus">请求状态</label>
+                        <select id="requestStatus">
+                            <option value="">全部状态</option>
+                            <option value="pending">待处理</option>
+                            <option value="approved">已批准</option>
+                            <option value="rejected">已拒绝</option>
+                            <option value="completed">已完成</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="dateRange">日期范围</label>
+                        <input type="text" id="dateRange" placeholder="选择日期范围" readonly>
+                    </div>
+                    
+                    <div class="search-actions">
+                        <button type="submit" class="btn btn-primary">搜索</button>
+                        <button type="button" id="resetSearch" class="btn btn-secondary">重置</button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- 影像请求列表 -->
+            <div class="image-requests-list">
+                <div class="section-header">
+                    <h2>我的影像请求</h2>
+                </div>
+                
+                <!-- 视图切换 -->
+                <div class="view-toggle">
+                    <button class="view-btn active" data-view="cards">卡片视图</button>
+                    <button class="view-btn" data-view="table">表格视图</button>
+                </div>
+                
+                <!-- 请求卡片视图 -->
+                <div class="requests-cards">
+                    <div class="request-card">
+                        <div class="request-card-header">
+                            <div class="request-doctor">李医生</div>
+                            <div class="request-status status-pending">待处理</div>
+                        </div>
+                        <div class="request-info">
+                            <div><strong>请求编号：</strong>REQ2023015</div>
+                            <div><strong>请求时间：</strong>2023-11-20 14:30</div>
+                            <div><strong>影像类型：</strong>胸部CT</div>
+                        </div>
+                        <div class="request-reason">需要查看患者近期的胸部CT影像，以便评估肺部情况和诊断结果，进一步制定治疗方案。</div>
+                        <div class="request-actions">
+                            <button class="request-action-btn btn-primary" data-id="REQ2023015" data-action="view">查看详情</button>
+                            <button class="request-action-btn btn-success" data-id="REQ2023015" data-action="approve">同意</button>
+                            <button class="request-action-btn btn-danger" data-id="REQ2023015" data-action="reject">拒绝</button>
+                        </div>
+                    </div>
+                    
+                    <div class="request-card">
+                        <div class="request-card-header">
+                            <div class="request-doctor">王医生</div>
+                            <div class="request-status status-approved">已批准</div>
+                        </div>
+                        <div class="request-info">
+                            <div><strong>请求编号：</strong>REQ2023014</div>
+                            <div><strong>请求时间：</strong>2023-11-18 09:15</div>
+                            <div><strong>影像类型：</strong>X光片</div>
+                        </div>
+                        <div class="request-reason">需要查看患者的X光片，以评估骨骼恢复情况，确保治疗效果。</div>
+                        <div class="request-actions">
+                            <button class="request-action-btn btn-primary" data-id="REQ2023014" data-action="view">查看详情</button>
+                            <button class="request-action-btn btn-warning" data-id="REQ2023014" data-action="upload">上传影像</button>
+                        </div>
+                    </div>
+                    
+                    <div class="request-card">
+                        <div class="request-card-header">
+                            <div class="request-doctor">张医生</div>
+                            <div class="request-status status-completed">已完成</div>
+                        </div>
+                        <div class="request-info">
+                            <div><strong>请求编号：</strong>REQ2023013</div>
+                            <div><strong>请求时间：</strong>2023-11-15 11:20</div>
+                            <div><strong>影像类型：</strong>脑部MRI</div>
+                        </div>
+                        <div class="request-reason">需要查看患者的脑部MRI影像，以进一步评估神经系统状况。</div>
+                        <div class="request-actions">
+                            <button class="request-action-btn btn-primary" data-id="REQ2023013" data-action="view">查看详情</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 请求表格视图 -->
+                <div class="requests-table">
+                    <div class="table-container">
+                        <table id="requestsTable">
+                            <thead>
+                                <tr>
+                                    <th>请求编号</th>
+                                    <th>医生姓名</th>
+                                    <th>影像类型</th>
+                                    <th>请求时间</th>
+                                    <th>状态</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>REQ2023015</td>
+                                    <td>李医生</td>
+                                    <td>胸部CT</td>
+                                    <td>2023-11-20 14:30</td>
+                                    <td><span class="request-status status-pending">待处理</span></td>
+                                    <td>
+                                        <button class="request-action-btn btn-primary" data-id="REQ2023015" data-action="view">查看详情</button>
+                                        <button class="request-action-btn btn-success" data-id="REQ2023015" data-action="approve">同意</button>
+                                        <button class="request-action-btn btn-danger" data-id="REQ2023015" data-action="reject">拒绝</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>REQ2023014</td>
+                                    <td>王医生</td>
+                                    <td>X光片</td>
+                                    <td>2023-11-18 09:15</td>
+                                    <td><span class="request-status status-approved">已批准</span></td>
+                                    <td>
+                                        <button class="request-action-btn btn-primary" data-id="REQ2023014" data-action="view">查看详情</button>
+                                        <button class="request-action-btn btn-warning" data-id="REQ2023014" data-action="upload">上传影像</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>REQ2023013</td>
+                                    <td>张医生</td>
+                                    <td>脑部MRI</td>
+                                    <td>2023-11-15 11:20</td>
+                                    <td><span class="request-status status-completed">已完成</span></td>
+                                    <td>
+                                        <button class="request-action-btn btn-primary" data-id="REQ2023013" data-action="view">查看详情</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- 分页控件 -->
+                <div class="pagination">
+                    <div class="page-info">显示 1-3 条，共 5 条记录</div>
+                    <div class="page-controls">
+                        <button class="page-btn" disabled>上一页</button>
+                        <button class="page-btn active">1</button>
+                        <button class="page-btn">2</button>
+                        <button class="page-btn">下一页</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- 影像请求详情模态框 -->
+    <div id="requestDetailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>影像请求详情</h2>
+                <button class="close-btn" id="closeModalBtn">&times;</button>
+            </div>
+            
+            <div id="requestDetailContent">
+                <div class="request-detail-info">
+                    <div class="request-detail-row">
+                        <div class="request-detail-label">请求编号：</div>
+                        <div class="request-detail-value">REQ2023015</div>
+                    </div>
+                    <div class="request-detail-row">
+                        <div class="request-detail-label">医生姓名：</div>
+                        <div class="request-detail-value">李医生</div>
+                    </div>
+                    <div class="request-detail-row">
+                        <div class="request-detail-label">所属科室：</div>
+                        <div class="request-detail-value">呼吸内科</div>
+                    </div>
+                    <div class="request-detail-row">
+                        <div class="request-detail-label">影像类型：</div>
+                        <div class="request-detail-value">胸部CT</div>
+                    </div>
+                    <div class="request-detail-row">
+                        <div class="request-detail-label">请求时间：</div>
+                        <div class="request-detail-value">2023-11-20 14:30</div>
+                    </div>
+                    <div class="request-detail-row">
+                        <div class="request-detail-label">请求状态：</div>
+                        <div class="request-detail-value"><span class="request-status status-pending">待处理</span></div>
+                    </div>
+                </div>
+                
+                <div class="request-detail-content">
+                    <h3>请求原因</h3>
+                    <p>需要查看患者近期的胸部CT影像，以便评估肺部情况和诊断结果，进一步制定治疗方案。根据患者的症状和之前的检查结果，我们需要了解更多关于肺部结构和功能的信息，以便做出更准确的诊断和治疗决策。</p>
+                </div>
+                
+                <div class="request-detail-content">
+                    <h3>查看目的</h3>
+                    <p>1. 评估肺部是否存在异常阴影或结节</p>
+                    <p>2. 了解肺部纹理和结构变化</p>
+                    <p>3. 评估胸腔积液情况</p>
+                    <p>4. 为后续治疗方案提供影像学依据</p>
+                </div>
+                
+                <div class="request-detail-content">
+                    <h3>隐私说明</h3>
+                    <p>您的影像资料仅用于医疗目的，我们将严格保护您的隐私信息。您可以随时撤销授权，我们会立即停止对您影像资料的访问。</p>
+                </div>
+                
+                <div id="requestActions" class="request-detail-content">
+                    <button class="btn btn-success" id="approveRequestBtn">同意查看</button>
+                    <button class="btn btn-danger" id="rejectRequestBtn">拒绝查看</button>
+                    <button class="btn btn-secondary" id="cancelRequestBtn">取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 文件上传模态框 -->
+    <div id="uploadModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>上传影像资料</h2>
+                <button class="close-btn" id="closeUploadModalBtn">&times;</button>
+            </div>
+            
+            <div id="uploadContent">
+                <div id="fileUploadArea" class="file-upload">
+                    <input type="file" id="fileUploadInput" class="file-upload-input" multiple accept=".jpg,.jpeg,.png,.pdf,.dcm">
+                    <div class="file-upload-icon">📁</div>
+                    <div class="file-upload-text">点击或拖拽文件到此处上传</div>
+                    <div class="file-upload-text" style="font-size: 12px; margin-top: 5px;">支持的格式：JPG、PNG、PDF、DCM</div>
+                </div>
+                
+                <div id="uploadedFiles" class="uploaded-files">
+                    <h4>已上传文件</h4>
+                    <!-- 上传的文件将显示在这里 -->
+                </div>
+                
+                <div class="request-detail-content" style="text-align: right;">
+                    <button class="btn btn-secondary" id="cancelUploadBtn">取消</button>
+                    <button class="btn btn-primary" id="submitUploadBtn" disabled>提交</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 确认模态框 -->
+    <div id="confirmModal" class="confirm-modal">
+        <div class="confirm-content">
+            <h3>确认操作</h3>
+            <p id="confirmMessage">您确定要执行此操作吗？</p>
+            <div class="confirm-actions">
+                <button class="btn btn-primary" id="confirmYesBtn">确定</button>
+                <button class="btn btn-secondary" id="confirmNoBtn">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { showAlert, storage } from '../assets/js/utils.js';
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 验证用户登录状态
+            const userInfo = storage.get('userInfo');
+            if (!userInfo || !userInfo.patientType) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // 设置页面内容
+            setupPageContent(userInfo);
+
+            // 设置事件监听器
+            setupEventListeners();
+        });
+
+        // 设置页面内容
+        function setupPageContent(userInfo) {
+            // 更新用户信息显示
+            document.querySelector('.user-name').textContent = userInfo.realName || userInfo.username;
+            
+            // 更新用户类型显示
+            let userTypeText = '普通患者';
+            if (userInfo.patientType === 'elderly') {
+                userTypeText = '老年患者';
+            } else if (userInfo.patientType === 'child') {
+                userTypeText = '儿童患者';
+            }
+            document.querySelector('.user-type').textContent = userTypeText;
+        }
+
+        // 设置事件监听器
+        function setupEventListeners() {
+            // 退出登录按钮
+            document.getElementById('logoutBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                storage.remove('userInfo');
+                showAlert('success', '退出成功！');
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 1000);
+            });
+
+            // 搜索表单提交
+            document.getElementById('searchForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                searchRequests();
+            });
+
+            // 重置搜索
+            document.getElementById('resetSearch').addEventListener('click', function() {
+                document.getElementById('searchForm').reset();
+                searchRequests();
+            });
+
+            // 视图切换
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // 移除所有按钮的active类
+                    document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+                    // 为当前按钮添加active类
+                    this.classList.add('active');
+                    // 切换视图
+                    const view = this.getAttribute('data-view');
+                    if (view === 'cards') {
+                        document.querySelector('.requests-cards').style.display = 'grid';
+                        document.querySelector('.requests-table').style.display = 'none';
+                    } else {
+                        document.querySelector('.requests-cards').style.display = 'none';
+                        document.querySelector('.requests-table').style.display = 'block';
+                    }
+                });
+            });
+
+            // 请求操作按钮
+            document.querySelectorAll('.request-action-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const requestId = this.getAttribute('data-id');
+                    const action = this.getAttribute('data-action');
+                    
+                    switch (action) {
+                        case 'view':
+                            viewRequestDetail(requestId);
+                            break;
+                        case 'approve':
+                            showConfirmModal(`您确定要同意医生查看您的影像资料吗？`, function() {
+                                approveRequest(requestId);
+                            });
+                            break;
+                        case 'reject':
+                            showConfirmModal(`您确定要拒绝医生查看您的影像资料吗？`, function() {
+                                rejectRequest(requestId);
+                            });
+                            break;
+                        case 'upload':
+                            showUploadModal(requestId);
+                            break;
+                    }
+                });
+            });
+
+            // 分页按钮
+            document.querySelectorAll('.page-btn').forEach(button => {
+                if (!button.disabled && !button.classList.contains('active')) {
+                    button.addEventListener('click', function() {
+                        changePage(this.textContent.trim());
+                    });
+                }
+            });
+
+            // 详情模态框按钮
+            document.getElementById('closeModalBtn').addEventListener('click', closeRequestDetailModal);
+            document.getElementById('approveRequestBtn').addEventListener('click', function() {
+                const requestId = document.querySelector('#requestDetailContent .request-detail-value:first-child').textContent;
+                closeRequestDetailModal();
+                showConfirmModal(`您确定要同意医生查看您的影像资料吗？`, function() {
+                    approveRequest(requestId);
+                });
+            });
+            document.getElementById('rejectRequestBtn').addEventListener('click', function() {
+                const requestId = document.querySelector('#requestDetailContent .request-detail-value:first-child').textContent;
+                closeRequestDetailModal();
+                showConfirmModal(`您确定要拒绝医生查看您的影像资料吗？`, function() {
+                    rejectRequest(requestId);
+                });
+            });
+            document.getElementById('cancelRequestBtn').addEventListener('click', closeRequestDetailModal);
+
+            // 上传模态框按钮
+            document.getElementById('closeUploadModalBtn').addEventListener('click', closeUploadModal);
+            document.getElementById('cancelUploadBtn').addEventListener('click', closeUploadModal);
+            document.getElementById('submitUploadBtn').addEventListener('click', submitUpload);
+            
+            // 文件上传区域点击事件
+            document.getElementById('fileUploadArea').addEventListener('click', function() {
+                document.getElementById('fileUploadInput').click();
+            });
+            
+            // 文件上传输入变化事件
+            document.getElementById('fileUploadInput').addEventListener('change', handleFileUpload);
+
+            // 确认模态框按钮
+            document.getElementById('confirmYesBtn').addEventListener('click', function() {
+                if (window.confirmCallback) {
+                    window.confirmCallback();
+                    window.confirmCallback = null;
+                }
+                closeConfirmModal();
+            });
+            document.getElementById('confirmNoBtn').addEventListener('click', closeConfirmModal);
+
+            // 点击模态框外部关闭
+            window.addEventListener('click', function(event) {
+                const detailModal = document.getElementById('requestDetailModal');
+                const uploadModal = document.getElementById('uploadModal');
+                const confirmModal = document.getElementById('confirmModal');
+                
+                if (event.target === detailModal) {
+                    closeRequestDetailModal();
+                } else if (event.target === uploadModal) {
+                    closeUploadModal();
+                } else if (event.target === confirmModal) {
+                    closeConfirmModal();
+                }
+            });
+        }
+
+        // 搜索请求
+        function searchRequests() {
+            const doctorName = document.getElementById('doctorName').value;
+            const requestStatus = document.getElementById('requestStatus').value;
+            const dateRange = document.getElementById('dateRange').value;
+            
+            // 模拟搜索操作
+            showAlert('info', '正在搜索影像请求...');
+            
+            // 实际项目中，这里会发送搜索请求到服务器
+            setTimeout(() => {
+                showAlert('success', '搜索完成！');
+                // 在实际项目中，这里会根据搜索结果更新列表
+            }, 800);
+        }
+
+        // 查看请求详情
+        function viewRequestDetail(requestId) {
+            // 模拟加载请求详情
+            showAlert('info', `正在加载请求 ${requestId} 的详情...`);
+            
+            // 实际项目中，这里会发送请求获取请求详情
+            setTimeout(() => {
+                // 在实际项目中，这里会根据获取到的详情更新模态框内容
+                const modal = document.getElementById('requestDetailModal');
+                modal.style.display = 'flex';
+            }, 800);
+        }
+
+        // 关闭请求详情模态框
+        function closeRequestDetailModal() {
+            const modal = document.getElementById('requestDetailModal');
+            modal.style.display = 'none';
+        }
+
+        // 同意请求
+        function approveRequest(requestId) {
+            // 模拟同意操作
+            showAlert('info', `正在处理请求 ${requestId} ...`);
+            
+            // 实际项目中，这里会发送请求到服务器
+            setTimeout(() => {
+                showAlert('success', '已成功同意医生查看您的影像资料！');
+                // 在实际项目中，这里会更新列表中的请求状态
+            }, 800);
+        }
+
+        // 拒绝请求
+        function rejectRequest(requestId) {
+            // 模拟拒绝操作
+            showAlert('info', `正在处理请求 ${requestId} ...`);
+            
+            // 实际项目中，这里会发送请求到服务器
+            setTimeout(() => {
+                showAlert('success', '已拒绝医生查看您的影像资料！');
+                // 在实际项目中，这里会更新列表中的请求状态
+            }, 800);
+        }
+
+        // 显示上传模态框
+        function showUploadModal(requestId) {
+            // 存储当前请求ID
+            window.currentUploadRequestId = requestId;
+            
+            // 清空已上传文件列表
+            document.getElementById('uploadedFiles').innerHTML = '<h4>已上传文件</h4>';
+            
+            // 禁用提交按钮
+            document.getElementById('submitUploadBtn').disabled = true;
+            
+            // 显示模态框
+            const modal = document.getElementById('uploadModal');
+            modal.style.display = 'flex';
+        }
+
+        // 关闭上传模态框
+        function closeUploadModal() {
+            const modal = document.getElementById('uploadModal');
+            modal.style.display = 'none';
+        }
+
+        // 处理文件上传
+        function handleFileUpload(event) {
+            const files = event.target.files;
+            const uploadedFilesContainer = document.getElementById('uploadedFiles');
+            
+            // 启用提交按钮
+            document.getElementById('submitUploadBtn').disabled = false;
+            
+            // 添加文件到列表
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const fileSize = formatFileSize(file.size);
+                
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                
+                const fileIcon = document.createElement('div');
+                fileIcon.className = 'file-icon';
+                
+                // 根据文件类型设置图标
+                if (file.type.includes('image/')) {
+                    fileIcon.textContent = '🖼️';
+                } else if (file.type === 'application/pdf') {
+                    fileIcon.textContent = '📄';
+                } else {
+                    fileIcon.textContent = '📁';
+                }
+                
+                const fileName = document.createElement('div');
+                fileName.className = 'file-name';
+                fileName.textContent = file.name;
+                
+                const fileSizeElem = document.createElement('div');
+                fileSizeElem.className = 'file-size';
+                fileSizeElem.textContent = fileSize;
+                
+                const fileRemove = document.createElement('button');
+                fileRemove.className = 'file-remove';
+                fileRemove.textContent = '×';
+                fileRemove.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    fileItem.remove();
+                    
+                    // 如果没有文件了，禁用提交按钮
+                    if (uploadedFilesContainer.querySelectorAll('.file-item').length === 0) {
+                        document.getElementById('submitUploadBtn').disabled = true;
+                    }
+                });
+                
+                fileItem.appendChild(fileIcon);
+                fileItem.appendChild(fileName);
+                fileItem.appendChild(fileSizeElem);
+                fileItem.appendChild(fileRemove);
+                
+                uploadedFilesContainer.appendChild(fileItem);
+            }
+        }
+
+        // 提交上传
+        function submitUpload() {
+            const requestId = window.currentUploadRequestId;
+            
+            // 模拟上传操作
+            showAlert('info', '正在上传影像资料...');
+            
+            // 实际项目中，这里会发送文件到服务器
+            setTimeout(() => {
+                showAlert('success', '影像资料上传成功！');
+                closeUploadModal();
+                // 在实际项目中，这里会更新列表中的请求状态
+            }, 1500);
+        }
+
+        // 显示确认模态框
+        function showConfirmModal(message, callback) {
+            document.getElementById('confirmMessage').textContent = message;
+            window.confirmCallback = callback;
+            
+            const modal = document.getElementById('confirmModal');
+            modal.style.display = 'flex';
+        }
+
+        // 关闭确认模态框
+        function closeConfirmModal() {
+            const modal = document.getElementById('confirmModal');
+            modal.style.display = 'none';
+            window.confirmCallback = null;
+        }
+
+        // 更改页面
+        function changePage(pageNumber) {
+            // 模拟分页操作
+            showAlert('info', `正在加载第 ${pageNumber} 页...`);
+            
+            // 实际项目中，这里会发送分页请求到服务器
+            setTimeout(() => {
+                showAlert('success', `已加载第 ${pageNumber} 页`);
+                // 在实际项目中，这里会更新列表内容和分页控件
+            }, 800);
+        }
+
+        // 格式化文件大小
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+    </script>
+</body>
+</html>

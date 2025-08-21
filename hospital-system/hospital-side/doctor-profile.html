@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>医生个人中心 - 医疗管理系统</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <style>
+        /* 医生个人中心页面特定样式 */
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        
+        .page-header {
+            margin-bottom: 20px;
+        }
+        
+        .page-header h1 {
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .page-header p {
+            color: #666;
+            margin-top: 0;
+        }
+        
+        .profile-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .profile-header {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 25px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .profile-info {
+            flex: 1;
+            min-width: 300px;
+        }
+        
+        .profile-info h2 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .profile-badge {
+            background-color: #e8f0fe;
+            color: #1a73e8;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: normal;
+        }
+        
+        .profile-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .profile-details p {
+            margin: 0;
+            color: #666;
+        }
+        
+        .profile-details strong {
+            color: #333;
+            margin-right: 5px;
+        }
+        
+        .profile-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .profile-sections {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        
+        .profile-section {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 25px;
+        }
+        
+        .profile-section h3 {
+            margin-top: 0;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            color: #333;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .specialty-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .specialty-tag {
+            background-color: #e8f0fe;
+            color: #1a73e8;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .specialty-tag .remove-tag {
+            cursor: pointer;
+            font-size: 16px;
+            line-height: 1;
+        }
+        
+        .add-specialty {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .add-specialty input {
+            flex: 1;
+            max-width: 250px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+        
+        .btn-primary {
+            background-color: #1a73e8;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #1557b0;
+        }
+        
+        .btn-secondary {
+            background-color: #f8f9fa;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #e9ecef;
+        }
+        
+        .btn-danger {
+            background-color: #d32f2f;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #c62828;
+        }
+        
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .dashboard-container {
+                flex-direction: column;
+            }
+            
+            .profile-header {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+            
+            .profile-details {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- 侧边栏导航 -->
+        <aside class="sidebar">
+            <h3>医生菜单</h3>
+            <ul>
+                <li><a href="doctor-dashboard.html">工作台</a></li>
+                <li><a href="doctor-profile.html" class="active">个人中心</a></li>
+                <li><a href="doctor-appointments.html">预约管理</a></li>
+                <li><a href="doctor-patient-records.html">患者记录</a></li>
+                <li><a href="doctor-medical-images.html">影像管理</a></li>
+                <li><a href="login.html" id="logoutBtn">退出登录</a></li>
+            </ul>
+        </aside>
+        
+        <!-- 主内容区域 -->
+        <main class="main-content">
+            <div class="page-header">
+                <h1>个人中心</h1>
+                <p>查看和管理您的个人信息和专业资料</p>
+            </div>
+            
+            <div class="profile-container">
+                <!-- 个人信息头部 -->
+                <div class="profile-header">
+                    <div class="profile-avatar">
+                        <img src="../assets/images/doctor-avatar.jpg" alt="医生头像">
+                    </div>
+                    
+                    <div class="profile-info">
+                        <h2>李四 <span class="profile-badge">内科医生</span></h2>
+                        <p>专业擅长：心血管疾病、消化系统疾病、呼吸系统疾病的诊断与治疗</p>
+                        
+                        <div class="profile-details">
+                            <p><strong>医生ID：</strong>DOC001</p>
+                            <p><strong>所属科室：</strong>内科</p>
+                            <p><strong>职称：</strong>副主任医师</p>
+                            <p><strong>工作年限：</strong>12年</p>
+                        </div>
+                        
+                        <div class="profile-actions">
+                            <button id="editProfileBtn" class="btn btn-primary">编辑资料</button>
+                            <button id="changeAvatarBtn" class="btn btn-secondary">更换头像</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 个人详细信息 -->
+                <div class="profile-sections">
+                    <!-- 基本信息 -->
+                    <div class="profile-section" id="basicInfoSection">
+                        <h3>基本信息</h3>
+                        <form id="basicInfoForm">
+                            <div class="form-group">
+                                <label for="fullName">真实姓名</label>
+                                <input type="text" id="fullName" name="fullName" class="form-control" value="李四" disabled>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="gender">性别</label>
+                                <select id="gender" name="gender" class="form-control" disabled>
+                                    <option value="male" selected>男</option>
+                                    <option value="female">女</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="age">年龄</label>
+                                <input type="number" id="age" name="age" class="form-control" value="40" disabled>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="phone">联系电话</label>
+                                <input type="tel" id="phone" name="phone" class="form-control" value="13800138002" disabled>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="email">电子邮箱</label>
+                                <input type="email" id="email" name="email" class="form-control" value="doctor001@hospital.com" disabled>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="address">联系地址</label>
+                                <input type="text" id="address" name="address" class="form-control" value="北京市海淀区医院路100号" disabled>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <!-- 专业信息 -->
+                    <div class="profile-section" id="professionalInfoSection">
+                        <h3>专业信息</h3>
+                        <form id="professionalInfoForm">
+                            <div class="form-group">
+                                <label for="department">所属科室</label>
+                                <select id="department" name="department" class="form-control" disabled>
+                                    <option value="internal" selected>内科</option>
+                                    <option value="surgery">外科</option>
+                                    <option value="pediatrics">儿科</option>
+                                    <option value="gynecology">妇科</option>
+                                    <option value="ophthalmology">眼科</option>
+                                    <option value="dermatology">皮肤科</option>
+                                    <option value="ent">耳鼻喉科</option>
+                                    <option value="neurology">神经内科</option>
+                                    <option value="cardiology">心内科</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="title">职称</label>
+                                <select id="title" name="title" class="form-control" disabled>
+                                    <option value="resident">住院医师</option>
+                                    <option value="attending">主治医师</option>
+                                    <option value="associate-chief" selected>副主任医师</option>
+                                    <option value="chief">主任医师</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="experience">工作年限</label>
+                                <input type="number" id="experience" name="experience" class="form-control" value="12" disabled>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="education">最高学历</label>
+                                <select id="education" name="education" class="form-control" disabled>
+                                    <option value="bachelor">本科</option>
+                                    <option value="master">硕士</option>
+                                    <option value="doctor" selected>博士</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="hospitalExperience">本院工作年限</label>
+                                <input type="number" id="hospitalExperience" name="hospitalExperience" class="form-control" value="8" disabled>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <!-- 擅长领域 -->
+                    <div class="profile-section" id="specialtiesSection">
+                        <h3>擅长领域</h3>
+                        <div id="specialtiesList" class="specialty-tags">
+                            <div class="specialty-tag">心血管疾病<span class="remove-tag" data-tag="心血管疾病">&times;</span></div>
+                            <div class="specialty-tag">消化系统疾病<span class="remove-tag" data-tag="消化系统疾病">&times;</span></div>
+                            <div class="specialty-tag">呼吸系统疾病<span class="remove-tag" data-tag="呼吸系统疾病">&times;</span></div>
+                            <div class="specialty-tag">高血压<span class="remove-tag" data-tag="高血压">&times;</span></div>
+                            <div class="specialty-tag">糖尿病<span class="remove-tag" data-tag="糖尿病">&times;</span></div>
+                        </div>
+                        
+                        <div id="addSpecialtyForm" class="add-specialty" style="display: none;">
+                            <input type="text" id="newSpecialty" placeholder="输入新的擅长领域">
+                            <button id="addSpecialtyBtn" class="btn btn-primary">添加</button>
+                        </div>
+                    </div>
+                    
+                    <!-- 个人简介 -->
+                    <div class="profile-section" id="bioSection">
+                        <h3>个人简介</h3>
+                        <form id="bioForm">
+                            <div class="form-group">
+                                <label for="bio">个人简介</label>
+                                <textarea id="bio" name="bio" class="form-control" disabled title="个人简介" placeholder="请输入个人简介">李四医生，副主任医师，医学博士，从事内科临床工作12年，拥有丰富的临床经验。擅长心血管疾病、消化系统疾病和呼吸系统疾病的诊断与治疗，尤其在高血压、冠心病、糖尿病等慢性疾病的管理方面有深入研究。曾在国内外核心期刊发表学术论文20余篇，主持多项科研项目。
+诊疗理念：以患者为中心，提供精准医疗服务，注重疾病的预防与健康教育。</textarea>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <!-- 执业资质 -->
+                    <div class="profile-section" id="qualificationSection">
+                        <h3>执业资质</h3>
+                        <div style="display: flex; flex-wrap: wrap; gap: 15px;">
+                            <div style="border: 1px solid #eee; border-radius: 4px; padding: 15px; min-width: 250px;">
+                                <h4 style="margin-top: 0; margin-bottom: 10px;">医师资格证书</h4>
+                                <p style="color: #666; margin-bottom: 10px;">证书编号：1234567890</p>
+                                <p style="color: #666; margin-bottom: 10px;">发证日期：2011-06-15</p>
+                                <button class="btn btn-secondary btn-sm" disabled>查看证书</button>
+                            </div>
+                            
+                            <div style="border: 1px solid #eee; border-radius: 4px; padding: 15px; min-width: 250px;">
+                                <h4 style="margin-top: 0; margin-bottom: 10px;">医师执业证书</h4>
+                                <p style="color: #666; margin-bottom: 10px;">证书编号：0987654321</p>
+                                <p style="color: #666; margin-bottom: 10px;">发证日期：2011-07-20</p>
+                                <button class="btn btn-secondary btn-sm" disabled>查看证书</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 编辑资料模态框 -->
+    <div id="editProfileModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>编辑个人资料</h2>
+                <button class="close" id="closeEditModal">&times;</button>
+            </div>
+            
+            <form id="editProfileForm">
+                <div class="form-group">
+                    <label for="editFullName">真实姓名</label>
+                    <input type="text" id="editFullName" name="editFullName" class="form-control" value="李四" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editGender">性别</label>
+                    <select id="editGender" name="editGender" class="form-control" required>
+                        <option value="male" selected>男</option>
+                        <option value="female">女</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editAge">年龄</label>
+                    <input type="number" id="editAge" name="editAge" class="form-control" value="40" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editPhone">联系电话</label>
+                    <input type="tel" id="editPhone" name="editPhone" class="form-control" value="13800138002" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editEmail">电子邮箱</label>
+                    <input type="email" id="editEmail" name="editEmail" class="form-control" value="doctor001@hospital.com" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editAddress">联系地址</label>
+                    <input type="text" id="editAddress" name="editAddress" class="form-control" value="北京市海淀区医院路100号">
+                </div>
+                
+                <div class="form-group">
+                    <label for="editTitle">职称</label>
+                    <select id="editTitle" name="editTitle" class="form-control" required>
+                        <option value="resident">住院医师</option>
+                        <option value="attending">主治医师</option>
+                        <option value="associate-chief" selected>副主任医师</option>
+                        <option value="chief">主任医师</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editExperience">工作年限</label>
+                    <input type="number" id="editExperience" name="editExperience" class="form-control" value="12" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editEducation">最高学历</label>
+                    <select id="editEducation" name="editEducation" class="form-control" required>
+                        <option value="bachelor">本科</option>
+                        <option value="master">硕士</option>
+                        <option value="doctor" selected>博士</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editHospitalExperience">本院工作年限</label>
+                    <input type="number" id="editHospitalExperience" name="editHospitalExperience" class="form-control" value="8" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editBio">个人简介</label>
+                    <textarea id="editBio" name="editBio" class="form-control" rows="4" required>李四医生，副主任医师，医学博士，从事内科临床工作12年，拥有丰富的临床经验。擅长心血管疾病、消化系统疾病和呼吸系统疾病的诊断与治疗，尤其在高血压、冠心病、糖尿病等慢性疾病的管理方面有深入研究。曾在国内外核心期刊发表学术论文20余篇，主持多项科研项目。
+
+诊疗理念：以患者为中心，提供精准医疗服务，注重疾病的预防与健康教育。</textarea>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" id="cancelEditBtn" class="btn btn-secondary">取消</button>
+                    <button type="submit" class="btn btn-primary">保存更改</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 更换头像模态框 -->
+    <div id="changeAvatarModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>更换头像</h2>
+                <button class="close" id="closeAvatarModal">&times;</button>
+            </div>
+            
+            <form id="changeAvatarForm">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <div style="width: 150px; height: 150px; border-radius: 50%; background-color: #f0f0f0; margin: 0 auto; overflow: hidden;">
+                        <img id="previewAvatar" src="../assets/images/doctor-avatar.jpg" alt="预览头像" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="avatarFile">选择图片（JPG、PNG格式，不超过2MB）</label>
+                    <input type="file" id="avatarFile" name="avatarFile" class="form-control" accept="image/jpeg, image/png" required>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" id="cancelAvatarBtn" class="btn btn-secondary">取消</button>
+                    <button type="submit" class="btn btn-primary">上传头像</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        import { validateForm, showAlert, storage } from '../assets/js/utils.js';
+
+        // 当前编辑模式状态
+        let isEditing = false;
+        
+        // 擅长领域数据
+        let specialties = ['心血管疾病', '消化系统疾病', '呼吸系统疾病', '高血压', '糖尿病'];
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 验证用户登录状态
+            const userInfo = storage.get('userInfo');
+            if (!userInfo || userInfo.userType !== 'doctor') {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // 设置事件监听器
+            setupEventListeners();
+        });
+
+        // 设置事件监听器
+        function setupEventListeners() {
+            // 编辑资料按钮
+            document.getElementById('editProfileBtn').addEventListener('click', function() {
+                document.getElementById('editProfileModal').style.display = 'flex';
+            });
+
+            // 关闭编辑模态框
+            document.getElementById('closeEditModal').addEventListener('click', function() {
+                document.getElementById('editProfileModal').style.display = 'none';
+            });
+
+            document.getElementById('cancelEditBtn').addEventListener('click', function() {
+                document.getElementById('editProfileModal').style.display = 'none';
+            });
+
+            // 编辑资料表单提交
+            document.getElementById('editProfileForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                // 表单验证
+                if (!validateForm('editProfileForm')) {
+                    return;
+                }
+
+                // 获取表单数据
+                const formData = {
+                    fullName: document.getElementById('editFullName').value,
+                    gender: document.getElementById('editGender').value,
+                    age: document.getElementById('editAge').value,
+                    phone: document.getElementById('editPhone').value,
+                    email: document.getElementById('editEmail').value,
+                    address: document.getElementById('editAddress').value,
+                    title: document.getElementById('editTitle').value,
+                    experience: document.getElementById('editExperience').value,
+                    education: document.getElementById('editEducation').value,
+                    hospitalExperience: document.getElementById('editHospitalExperience').value,
+                    bio: document.getElementById('editBio').value
+                };
+
+                // 模拟提交到服务器
+                console.log('保存医生资料:', formData);
+
+                // 更新页面显示的信息
+                updateProfileDisplay(formData);
+
+                // 关闭模态框
+                document.getElementById('editProfileModal').style.display = 'none';
+
+                // 显示成功提示
+                showAlert('success', '个人资料已成功更新');
+            });
+
+            // 更换头像按钮
+            document.getElementById('changeAvatarBtn').addEventListener('click', function() {
+                document.getElementById('changeAvatarModal').style.display = 'flex';
+            });
+
+            // 关闭头像模态框
+            document.getElementById('closeAvatarModal').addEventListener('click', function() {
+                document.getElementById('changeAvatarModal').style.display = 'none';
+            });
+
+            document.getElementById('cancelAvatarBtn').addEventListener('click', function() {
+                document.getElementById('changeAvatarModal').style.display = 'none';
+            });
+
+            // 头像预览
+            document.getElementById('avatarFile').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    // 检查文件大小
+                    if (file.size > 2 * 1024 * 1024) { // 2MB
+                        showAlert('error', '文件大小不能超过2MB');
+                        this.value = '';
+                        return;
+                    }
+
+                    // 检查文件类型
+                    if (!file.type.match('image/jpeg') && !file.type.match('image/png')) {
+                        showAlert('error', '请上传JPG或PNG格式的图片');
+                        this.value = '';
+                        return;
+                    }
+
+                    // 预览图片
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        document.getElementById('previewAvatar').src = event.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // 更换头像表单提交
+            document.getElementById('changeAvatarForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                // 检查是否选择了文件
+                const fileInput = document.getElementById('avatarFile');
+                if (!fileInput.files || fileInput.files.length === 0) {
+                    showAlert('error', '请选择要上传的头像文件');
+                    return;
+                }
+
+                // 模拟上传头像
+                showAlert('info', '头像正在上传，请稍候...');
+
+                // 模拟上传成功
+                setTimeout(() => {
+                    // 更新页面上的头像
+                    const avatarImg = document.querySelector('.profile-avatar img');
+                    avatarImg.src = document.getElementById('previewAvatar').src;
+
+                    // 关闭模态框
+                    document.getElementById('changeAvatarModal').style.display = 'none';
+
+                    // 显示成功提示
+                    showAlert('success', '头像已成功更换');
+                }, 1500);
+            });
+
+            // 擅长领域标签删除
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('remove-tag')) {
+                    const tag = e.target.getAttribute('data-tag');
+                    removeSpecialty(tag);
+                }
+            });
+
+            // 退出登录
+            document.getElementById('logoutBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                storage.remove('userInfo');
+                showAlert('success', '退出成功！');
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 1000);
+            });
+
+            // 点击模态框外部关闭
+            window.addEventListener('click', function(event) {
+                const editModal = document.getElementById('editProfileModal');
+                const avatarModal = document.getElementById('changeAvatarModal');
+                
+                if (event.target === editModal) {
+                    editModal.style.display = 'none';
+                }
+                
+                if (event.target === avatarModal) {
+                    avatarModal.style.display = 'none';
+                }
+            });
+        }
+
+        // 更新个人资料显示
+        function updateProfileDisplay(data) {
+            // 更新基本信息
+            document.getElementById('fullName').value = data.fullName;
+            document.getElementById('gender').value = data.gender;
+            document.getElementById('age').value = data.age;
+            document.getElementById('phone').value = data.phone;
+            document.getElementById('email').value = data.email;
+            document.getElementById('address').value = data.address;
+            
+            // 更新专业信息
+            document.getElementById('title').value = data.title;
+            document.getElementById('experience').value = data.experience;
+            document.getElementById('education').value = data.education;
+            document.getElementById('hospitalExperience').value = data.hospitalExperience;
+            
+            // 更新个人简介
+            document.getElementById('bio').value = data.bio;
+            
+            // 更新页面标题等显示信息
+            document.querySelector('.profile-info h2').firstChild.textContent = data.fullName + ' ';
+            
+            // 更新职称显示
+            const titleMap = {
+                'resident': '住院医师',
+                'attending': '主治医师',
+                'associate-chief': '副主任医师',
+                'chief': '主任医师'
+            };
+            
+            // 更新工作年限显示
+            const experienceElement = document.querySelector('.profile-details p:nth-child(4)');
+            if (experienceElement) {
+                experienceElement.innerHTML = `<strong>工作年限：</strong>${data.experience}年`;
+            }
+        }
+
+        // 删除擅长领域标签
+        function removeSpecialty(tag) {
+            // 从数组中移除
+            const index = specialties.indexOf(tag);
+            if (index !== -1) {
+                specialties.splice(index, 1);
+                
+                // 更新UI显示
+                const tagElement = document.querySelector(`.specialty-tag[data-tag="${tag}"]`);
+                if (tagElement) {
+                    tagElement.remove();
+                }
+                
+                // 显示提示
+                showAlert('success', '已移除擅长领域');
+            }
+        }
+    </script>
+    <script src="../assets/js/utils.js"></script>
+</body>
+</html>

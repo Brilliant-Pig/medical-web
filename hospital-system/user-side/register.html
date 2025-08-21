@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>患者注册 - 医疗预约系统</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <style>
+        /* 用户端注册页面特定样式 */
+        body {
+            background-color: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+                'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+                sans-serif;
+        }
+        
+        .register-container {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            width: 100%;
+            max-width: 600px;
+            overflow-y: auto;
+            max-height: 90vh;
+        }
+        
+        .register-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .register-header h1 {
+            color: #333;
+            margin: 0;
+            font-size: 28px;
+            font-weight: 600;
+        }
+        
+        .register-header p {
+            color: #666;
+            margin: 10px 0 0;
+            font-size: 14px;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            flex: 1;
+            margin-bottom: 20px;
+        }
+        
+        .form-group.full-width {
+            flex: 100%;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #1a73e8;
+        }
+        
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: #999;
+        }
+        
+        .register-btn {
+            width: 100%;
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .register-btn:hover {
+            background-color: #1557b0;
+        }
+        
+        .register-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .register-footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .register-footer a {
+            color: #1a73e8;
+            text-decoration: none;
+        }
+        
+        .register-footer a:hover {
+            text-decoration: underline;
+        }
+        
+        .patient-type-selector {
+            margin-bottom: 20px;
+        }
+        
+        .patient-type-selector label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .patient-type-options {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .patient-type-option {
+            flex: 1;
+            min-width: 120px;
+            position: relative;
+            padding: 12px 16px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        
+        .patient-type-option:hover {
+            border-color: #1a73e8;
+        }
+        
+        .patient-type-option input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+        }
+        
+        .patient-type-option input:checked + .patient-type-label {
+            color: #1a73e8;
+        }
+        
+        .patient-type-option input:checked + .patient-type-label:before {
+            background-color: #1a73e8;
+            border-color: #1a73e8;
+        }
+        
+        .patient-type-option input:checked + .patient-type-label:after {
+            display: block;
+        }
+        
+        .patient-type-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            position: relative;
+            cursor: pointer;
+            font-size: 14px;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        
+        .patient-type-label:before {
+            content: '';
+            position: absolute;
+            left: 0;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+        
+        .patient-type-label:after {
+            content: '';
+            position: absolute;
+            left: 6px;
+            top: 6px;
+            width: 8px;
+            height: 12px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+            display: none;
+        }
+        
+        .contact-info {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .contact-info.active {
+            display: block;
+        }
+        
+        .contact-info h3 {
+            margin: 0 0 15px 0;
+            color: #333;
+            font-size: 16px;
+        }
+        
+        .terms-privacy {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .terms-privacy input {
+            margin-right: 10px;
+        }
+        
+        .terms-privacy a {
+            color: #1a73e8;
+            text-decoration: none;
+        }
+        
+        .terms-privacy a:hover {
+            text-decoration: underline;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .register-container {
+                padding: 30px 20px;
+                margin: 20px;
+            }
+            
+            .form-row {
+                flex-direction: column;
+            }
+            
+            .patient-type-options {
+                flex-direction: column;
+            }
+            
+            .patient-type-option {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <div class="register-header">
+            <h1>患者注册</h1>
+            <p>创建账号，享受便捷的医疗服务</p>
+        </div>
+        
+        <form id="registerForm">
+            <!-- 基本信息 -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="username">用户名</label>
+                    <input type="text" id="username" placeholder="请设置用户名" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">密码</label>
+                    <input type="password" id="password" placeholder="请设置密码" required>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="confirm-password">确认密码</label>
+                    <input type="password" id="confirm-password" placeholder="请再次输入密码" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone">手机号码</label>
+                    <input type="tel" id="phone" placeholder="请输入手机号码" required>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="real-name">真实姓名</label>
+                    <input type="text" id="real-name" placeholder="请输入真实姓名" required>
+                </div>
+                <div class="form-group">
+                    <label for="id-card">身份证号</label>
+                    <input type="text" id="id-card" placeholder="请输入身份证号" required>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="gender">性别</label>
+                    <select id="gender" required>
+                        <option value="">请选择性别</option>
+                        <option value="male">男</option>
+                        <option value="female">女</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="birthdate">出生日期</label>
+                    <input type="date" id="birthdate" required>
+                </div>
+            </div>
+            
+            <div class="form-group full-width">
+                <label for="address">居住地址</label>
+                <textarea id="address" placeholder="请输入详细居住地址" required></textarea>
+            </div>
+            
+            <!-- 患者类型选择 -->
+            <div class="patient-type-selector">
+                <label>患者类型</label>
+                <div class="patient-type-options">
+                    <div class="patient-type-option">
+                        <input type="radio" id="adult" name="patientType" value="adult" checked>
+                        <label for="adult" class="patient-type-label">成年人</label>
+                    </div>
+                    <div class="patient-type-option">
+                        <input type="radio" id="elderly" name="patientType" value="elderly">
+                        <label for="elderly" class="patient-type-label">老年人</label>
+                    </div>
+                    <div class="patient-type-option">
+                        <input type="radio" id="child" name="patientType" value="child">
+                        <label for="child" class="patient-type-label">儿童</label>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 联系人信息（老年人和儿童需要填写） -->
+            <div id="contact-info" class="contact-info">
+                <h3>紧急联系人信息</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="contact-name">联系人姓名</label>
+                        <input type="text" id="contact-name" placeholder="请输入联系人姓名">
+                    </div>
+                    <div class="form-group">
+                        <label for="contact-phone">联系人电话</label>
+                        <input type="tel" id="contact-phone" placeholder="请输入联系人电话">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="contact-relationship">与患者关系</label>
+                        <select id="contact-relationship">
+                            <option value="">请选择关系</option>
+                            <option value="parent">父母</option>
+                            <option value="spouse">配偶</option>
+                            <option value="child">子女</option>
+                            <option value="sibling">兄弟姐妹</option>
+                            <option value="other">其他</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 同意条款 -->
+            <div class="terms-privacy">
+                <label>
+                    <input type="checkbox" id="agree-terms" required>
+                    我已阅读并同意 <a href="#">《用户服务条款》</a> 和 <a href="#">《隐私政策》</a>
+                </label>
+            </div>
+            
+            <button type="submit" class="register-btn">注册</button>
+        </form>
+        
+        <div class="register-footer">
+            已有账号？ <a href="login.html">立即登录</a>
+        </div>
+    </div>
+
+    <script type="module">
+        import { showAlert, storage, validateForm } from '../assets/js/utils.js';
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 设置患者类型选择器事件监听
+            const patientTypeRadios = document.querySelectorAll('input[name="patientType"]');
+            const contactInfo = document.getElementById('contact-info');
+
+            patientTypeRadios.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    if (this.value === 'elderly' || this.value === 'child') {
+                        contactInfo.classList.add('active');
+                        // 当选择老年人或儿童时，联系人信息变为必填
+                        document.getElementById('contact-name').required = true;
+                        document.getElementById('contact-phone').required = true;
+                        document.getElementById('contact-relationship').required = true;
+                    } else {
+                        contactInfo.classList.remove('active');
+                        // 当选择成年人时，联系人信息变为非必填
+                        document.getElementById('contact-name').required = false;
+                        document.getElementById('contact-phone').required = false;
+                        document.getElementById('contact-relationship').required = false;
+                    }
+                });
+            });
+
+            // 设置表单提交事件
+            document.getElementById('registerForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                register();
+            });
+        });
+
+        // 注册函数
+        function register() {
+            // 获取表单数据
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+            const phone = document.getElementById('phone').value.trim();
+            const realName = document.getElementById('real-name').value.trim();
+            const idCard = document.getElementById('id-card').value.trim();
+            const gender = document.getElementById('gender').value;
+            const birthdate = document.getElementById('birthdate').value;
+            const address = document.getElementById('address').value.trim();
+            const patientType = document.querySelector('input[name="patientType"]:checked').value;
+            const agreeTerms = document.getElementById('agree-terms').checked;
+
+            // 联系人信息
+            let contactName = null;
+            let contactPhone = null;
+            let contactRelationship = null;
+
+            if (patientType === 'elderly' || patientType === 'child') {
+                contactName = document.getElementById('contact-name').value.trim();
+                contactPhone = document.getElementById('contact-phone').value.trim();
+                contactRelationship = document.getElementById('contact-relationship').value;
+            }
+
+            // 表单验证
+            const validations = [
+                { value: username, type: 'required', message: '请输入用户名' },
+                { value: password, type: 'required', message: '请输入密码' },
+                { value: password, type: 'minLength', minLength: 6, message: '密码长度不能少于6位' },
+                { value: confirmPassword, type: 'required', message: '请确认密码' },
+                { value: confirmPassword, type: 'match', match: password, message: '两次输入的密码不一致' },
+                { value: phone, type: 'required', message: '请输入手机号码' },
+                { value: phone, type: 'phone', message: '请输入有效的手机号码' },
+                { value: realName, type: 'required', message: '请输入真实姓名' },
+                { value: idCard, type: 'required', message: '请输入身份证号' },
+                { value: gender, type: 'required', message: '请选择性别' },
+                { value: birthdate, type: 'required', message: '请选择出生日期' },
+                { value: address, type: 'required', message: '请输入居住地址' },
+                { value: agreeTerms, type: 'checked', message: '请阅读并同意用户服务条款和隐私政策' }
+            ];
+
+            // 如果是老年人或儿童，添加联系人信息的验证
+            if (patientType === 'elderly' || patientType === 'child') {
+                validations.push(
+                    { value: contactName, type: 'required', message: '请输入联系人姓名' },
+                    { value: contactPhone, type: 'required', message: '请输入联系人电话' },
+                    { value: contactPhone, type: 'phone', message: '请输入有效的联系人电话' },
+                    { value: contactRelationship, type: 'required', message: '请选择与患者的关系' }
+                );
+            }
+
+            if (!validateForm(validations)) {
+                return;
+            }
+
+            // 模拟注册请求
+            const registerBtn = document.querySelector('.register-btn');
+            registerBtn.disabled = true;
+            registerBtn.textContent = '注册中...';
+
+            // 模拟后端处理
+            setTimeout(() => {
+                // 这里是模拟的注册逻辑，实际项目中应替换为真实的API请求
+                // 构建用户信息对象
+                const userInfo = {
+                    username: username,
+                    password: password, // 实际项目中应传输加密后的密码
+                    phone: phone,
+                    realName: realName,
+                    idCard: idCard,
+                    gender: gender,
+                    birthdate: birthdate,
+                    address: address,
+                    patientType: patientType,
+                    registerTime: new Date().toISOString()
+                };
+
+                // 如果是老年人或儿童，添加联系人信息
+                if (patientType === 'elderly' || patientType === 'child') {
+                    userInfo.contactInfo = {
+                        name: contactName,
+                        phone: contactPhone,
+                        relationship: contactRelationship
+                    };
+                }
+
+                // 保存用户信息到本地存储（实际项目中应发送到服务器）
+                console.log('注册用户信息:', userInfo);
+
+                showAlert('success', '注册成功！即将跳转到登录页面...');
+
+                // 跳转到登录页面
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 2000);
+            }, 1500);
+        }
+    </script>
+    <script src="../assets/js/utils.js"></script>
+</body>
+</html>

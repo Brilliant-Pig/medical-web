@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>医生注册 - 医疗管理系统</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <style>
+        /* 注册页面特定样式 */
+        body {
+            background-color: #f5f5f5;
+        }
+        
+        .register-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .register-box {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            width: 100%;
+            max-width: 500px;
+        }
+        
+        .register-box h2 {
+            margin-bottom: 20px;
+            text-align: center;
+            color: #1a73e8;
+        }
+        
+        .register-form .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .register-form label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        
+        .register-form input,
+        .register-form select,
+        .register-form textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        .register-form input:focus,
+        .register-form select:focus,
+        .register-form textarea:focus {
+            outline: none;
+            border-color: #1a73e8;
+            box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
+        }
+        
+        .register-form button {
+            width: 100%;
+            padding: 12px;
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+        }
+        
+        .register-form button:hover {
+            background-color: #1557b0;
+        }
+        
+        .register-form .error-message {
+            color: red;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        
+        .form-footer {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .form-footer a {
+            color: #1a73e8;
+            text-decoration: none;
+        }
+        
+        .form-footer a:hover {
+            text-decoration: underline;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <div class="register-box">
+            <h2>医生注册</h2>
+            <form id="registerForm" class="register-form">
+                <div class="form-group">
+                    <label for="fullname">姓名</label>
+                    <input type="text" id="fullname" name="fullname" required placeholder="请输入真实姓名">
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="gender">性别</label>
+                        <select id="gender" name="gender" class="form-control">
+                            <option value="male">男</option>
+                            <option value="female">女</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="age">年龄</label>
+                        <input type="number" id="age" name="age" min="22" max="70" required placeholder="请输入年龄">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="department">所属科室</label>
+                    <select id="department" name="department" class="form-control" required>
+                        <option value="">请选择科室</option>
+                        <option value="internal">内科</option>
+                        <option value="surgery">外科</option>
+                        <option value="pediatrics">儿科</option>
+                        <option value="gynecology">妇科</option>
+                        <option value="ophthalmology">眼科</option>
+                        <option value="dermatology">皮肤科</option>
+                        <option value="ent">耳鼻喉科</option>
+                        <option value="neurology">神经内科</option>
+                        <option value="cardiology">心内科</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="specialty">擅长领域</label>
+                    <input type="text" id="specialty" name="specialty" required placeholder="请输入擅长领域">
+                </div>
+                
+                <div class="form-group">
+                    <label for="title">职称</label>
+                    <select id="title" name="title" class="form-control" required>
+                        <option value="">请选择职称</option>
+                        <option value="resident">住院医师</option>
+                        <option value="attending">主治医师</option>
+                        <option value="associate-chief">副主任医师</option>
+                        <option value="chief">主任医师</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="contact">联系电话</label>
+                    <input type="tel" id="contact" name="contact" required placeholder="请输入手机号码">
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">邮箱</label>
+                    <input type="email" id="email" name="email" required placeholder="请输入邮箱地址">
+                </div>
+                
+                <div class="form-group">
+                    <label for="username">用户名</label>
+                    <input type="text" id="username" name="username" required placeholder="请设置登录用户名">
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">密码</label>
+                    <input type="password" id="password" name="password" required placeholder="请设置密码" data-minlength="6">
+                </div>
+                
+                <div class="form-group">
+                    <label for="confirmPassword">确认密码</label>
+                    <input type="password" id="confirmPassword" name="confirmPassword" required placeholder="请再次输入密码">
+                </div>
+                
+                <button type="submit">注册</button>
+                
+                <div class="form-footer">
+                    <p>已有账号？<a href="login.html">立即登录</a></p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        import { validateForm, showAlert } from '../assets/js/utils.js';
+
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // 表单验证
+            if (!validateForm('registerForm')) {
+                return;
+            }
+            
+            // 检查密码是否一致
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (password !== confirmPassword) {
+                // 显示密码不一致的错误
+                const confirmPasswordInput = document.getElementById('confirmPassword');
+                
+                // 移除已有的错误提示
+                const existingError = confirmPasswordInput.parentNode.querySelector('.error-message');
+                if (existingError) {
+                    confirmPasswordInput.parentNode.removeChild(existingError);
+                }
+                
+                // 创建新的错误提示
+                const errorElement = document.createElement('div');
+                errorElement.className = 'error-message';
+                errorElement.textContent = '两次输入的密码不一致';
+                confirmPasswordInput.parentNode.appendChild(errorElement);
+                
+                // 高亮输入框
+                confirmPasswordInput.style.borderColor = 'red';
+                
+                return;
+            }
+            
+            // 获取表单数据
+            const formData = {
+                fullname: document.getElementById('fullname').value,
+                gender: document.getElementById('gender').value,
+                age: document.getElementById('age').value,
+                department: document.getElementById('department').value,
+                specialty: document.getElementById('specialty').value,
+                title: document.getElementById('title').value,
+                contact: document.getElementById('contact').value,
+                email: document.getElementById('email').value,
+                username: document.getElementById('username').value,
+                password: password
+            };
+            
+            // 模拟注册提交（实际项目中应发送到服务器）
+            console.log('注册信息:', formData);
+            
+            // 模拟注册成功
+            showAlert('success', '注册成功！请登录');
+            
+            // 跳转到登录页面
+            setTimeout(() => {
+                window.location.href = 'login.html';
+            }, 1500);
+        });
+    </script>
+</body>
+</html>

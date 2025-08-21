@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>医疗记录 - 医疗预约系统</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <style>
+        /* 医疗记录页面特定样式 */
+        .medical-records-container {
+            display: flex;
+            min-height: 100vh;
+            background-color: #f8f9fa;
+        }
+        
+        .sidebar {
+            width: 250px;
+            background-color: #fff;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+        
+        .sidebar h3 {
+            margin: 0 0 20px 0;
+            color: #333;
+            font-size: 20px;
+            text-align: center;
+        }
+        
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .sidebar li {
+            margin-bottom: 10px;
+        }
+        
+        .sidebar a {
+            display: block;
+            padding: 12px 16px;
+            color: #333;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        
+        .sidebar a:hover {
+            background-color: #f8f9fa;
+            color: #1a73e8;
+        }
+        
+        .sidebar a.active {
+            background-color: #e3f2fd;
+            color: #1a73e8;
+            font-weight: 500;
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .header {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            color: #333;
+            margin: 0;
+            font-size: 24px;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .user-avatar {
+            width: 48px;
+            height: 48px;
+            background-color: #e3f2fd;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: #1a73e8;
+            font-weight: 500;
+        }
+        
+        .user-details {
+            text-align: right;
+        }
+        
+        .user-name {
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .user-type {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .logout-btn {
+            background: none;
+            border: none;
+            color: #d32f2f;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 0;
+            text-decoration: underline;
+        }
+        
+        .logout-btn:hover {
+            color: #c62828;
+        }
+        
+        /* 搜索和筛选区域 */
+        .search-filter {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .search-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            align-items: end;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .form-group label {
+            font-size: 14px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .form-group input,
+        .form-group select {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #1a73e8;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background-color 0.3s;
+            text-decoration: none;
+        }
+        
+        .btn-primary {
+            background-color: #1a73e8;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #1557b0;
+        }
+        
+        .btn-secondary {
+            background-color: #f8f9fa;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #e9ecef;
+        }
+        
+        .search-actions {
+            display: flex;
+            gap: 10px;
+            grid-column: 1 / -1;
+        }
+        
+        /* 医疗记录列表 */
+        .medical-records-list {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .section-header h2 {
+            margin: 0;
+            color: #333;
+            font-size: 20px;
+        }
+        
+        /* 视图切换 */
+        .view-toggle {
+            display: flex;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        
+        .view-btn {
+            padding: 8px 16px;
+            border: none;
+            background-color: #fff;
+            cursor: pointer;
+            font-size: 14px;
+            color: #666;
+            transition: all 0.3s;
+        }
+        
+        .view-btn.active {
+            background-color: #1a73e8;
+            color: white;
+        }
+        
+        .view-btn:hover:not(.active) {
+            background-color: #f8f9fa;
+        }
+        
+        /* 记录卡片视图 */
+        .records-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+        
+        .record-card {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+        
+        .record-card:hover {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transform: translateY(-3px);
+        }
+        
+        .record-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+        
+        .record-type {
+            font-weight: 600;
+            color: #333;
+            font-size: 18px;
+        }
+        
+        .record-date {
+            font-size: 14px;
+            color: #666;
+            background-color: #f8f9fa;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        
+        .record-doctor {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .record-summary {
+            font-size: 14px;
+            color: #333;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+        }
+        
+        .record-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .record-department {
+            font-size: 12px;
+            color: #666;
+            background-color: #e3f2fd;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        
+        .view-record-btn {
+            padding: 6px 12px;
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background-color 0.3s;
+            text-decoration: none;
+        }
+        
+        .view-record-btn:hover {
+            background-color: #1557b0;
+        }
+        
+        /* 记录表格视图 */
+        .records-table {
+            display: none;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th,
+        td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        th {
+            background-color: #f8f9fa;
+            font-weight: 500;
+            color: #333;
+        }
+        
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        /* 分页控件 */
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        
+        .page-info {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .page-controls {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .page-btn {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            background-color: #fff;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .page-btn:hover:not(:disabled) {
+            background-color: #f8f9fa;
+            border-color: #1a73e8;
+            color: #1a73e8;
+        }
+        
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .page-btn.active {
+            background-color: #1a73e8;
+            color: white;
+            border-color: #1a73e8;
+        }
+        
+        /* 记录详情模态框 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 30px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .modal-header h2 {
+            margin: 0;
+            color: #333;
+            font-size: 20px;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        
+        .close-btn:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .record-detail-info {
+            margin-bottom: 20px;
+        }
+        
+        .record-detail-row {
+            display: flex;
+            margin-bottom: 10px;
+        }
+        
+        .record-detail-label {
+            width: 120px;
+            font-weight: 500;
+            color: #666;
+        }
+        
+        .record-detail-value {
+            flex: 1;
+            color: #333;
+        }
+        
+        .record-detail-content {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        
+        .record-detail-content h3 {
+            margin: 0 0 15px 0;
+            color: #333;
+            font-size: 18px;
+        }
+        
+        .record-detail-content p {
+            line-height: 1.6;
+            color: #333;
+        }
+        
+        .record-prescriptions {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        
+        .record-prescriptions h3 {
+            margin: 0 0 15px 0;
+            color: #333;
+            font-size: 18px;
+        }
+        
+        .prescription-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .prescription-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .prescription-item:last-child {
+            border-bottom: none;
+        }
+        
+        .prescription-name {
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .prescription-info {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .medical-records-container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                margin-bottom: 20px;
+            }
+            
+            .header {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px;
+            }
+            
+            .user-info {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .user-details {
+                text-align: center;
+            }
+            
+            .search-form {
+                grid-template-columns: 1fr;
+            }
+            
+            .search-actions {
+                flex-direction: column;
+            }
+            
+            .records-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .pagination {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            
+            .record-detail-row {
+                flex-direction: column;
+            }
+            
+            .record-detail-label {
+                width: auto;
+                margin-bottom: 5px;
+            }
+            
+            .prescription-item {
+                flex-direction: column;
+                text-align: center;
+                gap: 5px;
+            }
+            
+            .modal-content {
+                width: 95%;
+                margin: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="medical-records-container">
+        <!-- 侧边栏导航 -->
+        <aside class="sidebar">
+            <h3>患者菜单</h3>
+            <ul>
+                <li><a href="dashboard.html">仪表盘</a></li>
+                <li><a href="appointments.html">预约管理</a></li>
+                <li><a href="medical-records.html" class="active">医疗记录</a></li>
+                <li><a href="image-requests.html">影像请求</a></li>
+                <li><a href="profile.html">个人中心</a></li>
+                <li><a href="login.html" id="logoutBtn">退出登录</a></li>
+            </ul>
+        </aside>
+        
+        <!-- 主内容区域 -->
+        <main class="main-content">
+            <div class="header">
+                <h1>医疗记录</h1>
+                <div class="user-info">
+                    <div class="user-avatar">患</div>
+                    <div class="user-details">
+                        <div class="user-name">张三</div>
+                        <div class="user-type">普通患者</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 搜索和筛选区域 -->
+            <div class="search-filter">
+                <form id="searchForm" class="search-form">
+                    <div class="form-group">
+                        <label for="doctorName">医生姓名</label>
+                        <input type="text" id="doctorName" placeholder="请输入医生姓名">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="department">科室</label>
+                        <select id="department">
+                            <option value="">全部科室</option>
+                            <option value="internal">内科</option>
+                            <option value="surgery">外科</option>
+                            <option value="pediatrics">儿科</option>
+                            <option value="obstetrics">妇产科</option>
+                            <option value="dermatology">皮肤科</option>
+                            <option value="ophthalmology">眼科</option>
+                            <option value="ENT">耳鼻喉科</option>
+                            <option value="neurology">神经内科</option>
+                            <option value="psychiatry">精神心理科</option>
+                            <option value="orthopedics">骨科</option>
+                            <option value="cardiology">心血管内科</option>
+                            <option value="gastroenterology">消化内科</option>
+                            <option value="respiratory">呼吸内科</option>
+                            <option value="endocrinology">内分泌科</option>
+                            <option value="urology">泌尿外科</option>
+                            <option value="radiology">放射科</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="recordType">记录类型</label>
+                        <select id="recordType">
+                            <option value="">全部类型</option>
+                            <option value="physical">体检报告</option>
+                            <option value="diagnosis">诊断记录</option>
+                            <option value="treatment">治疗方案</option>
+                            <option value="followup">复诊记录</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="dateRange">日期范围</label>
+                        <input type="text" id="dateRange" placeholder="选择日期范围" readonly>
+                    </div>
+                    
+                    <div class="search-actions">
+                        <button type="submit" class="btn btn-primary">搜索</button>
+                        <button type="button" id="resetSearch" class="btn btn-secondary">重置</button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- 医疗记录列表 -->
+            <div class="medical-records-list">
+                <div class="section-header">
+                    <h2>我的医疗记录</h2>
+                </div>
+                
+                <!-- 视图切换 -->
+                <div class="view-toggle">
+                    <button class="view-btn active" data-view="cards">卡片视图</button>
+                    <button class="view-btn" data-view="table">表格视图</button>
+                </div>
+                
+                <!-- 记录卡片视图 -->
+                <div class="records-cards">
+                    <div class="record-card">
+                        <div class="record-card-header">
+                            <div class="record-type">常规体检</div>
+                            <div class="record-date">2023-11-15</div>
+                        </div>
+                        <div class="record-doctor">张医生 - 全科</div>
+                        <div class="record-summary">患者进行了年度体检，包括血常规、尿常规、肝功能、肾功能、心电图等检查项目。检查结果显示基本正常，建议保持健康饮食和适量运动。</div>
+                        <div class="record-details">
+                            <div class="record-department">全科</div>
+                            <button class="view-record-btn" data-id="REC2023015">查看详情</button>
+                        </div>
+                    </div>
+                    
+                    <div class="record-card">
+                        <div class="record-card-header">
+                            <div class="record-type">高血压复诊</div>
+                            <div class="record-date">2023-10-28</div>
+                        </div>
+                        <div class="record-doctor">李医生 - 内科</div>
+                        <div class="record-summary">患者因高血压复诊，血压控制良好。医生建议继续当前药物治疗方案，并定期监测血压变化。饮食上注意低盐低脂，适量运动，保持良好的生活习惯。</div>
+                        <div class="record-details">
+                            <div class="record-department">内科</div>
+                            <button class="view-record-btn" data-id="REC2023014">查看详情</button>
+                        </div>
+                    </div>
+                    
+                    <div class="record-card">
+                        <div class="record-card-header">
+                            <div class="record-type">心脏超声检查</div>
+                            <div class="record-date">2023-10-15</div>
+                        </div>
+                        <div class="record-doctor">郑医生 - 心血管内科</div>
+                        <div class="record-summary">心脏超声检查显示各房室大小正常，心室壁厚度正常，心功能良好，未见明显异常。建议继续控制血压，定期复查。</div>
+                        <div class="record-details">
+                            <div class="record-department">心血管内科</div>
+                            <button class="view-record-btn" data-id="REC2023013">查看详情</button>
+                        </div>
+                    </div>
+                    
+                    <div class="record-card">
+                        <div class="record-card-header">
+                            <div class="record-type">上呼吸道感染治疗</div>
+                            <div class="record-date">2023-09-20</div>
+                        </div>
+                        <div class="record-doctor">王医生 - 呼吸内科</div>
+                        <div class="record-summary">患者因发热、咳嗽就诊，诊断为上呼吸道感染。开具抗生素和止咳药物，建议多喝水，注意休息，避免劳累。一周后复诊。</div>
+                        <div class="record-details">
+                            <div class="record-department">呼吸内科</div>
+                            <button class="view-record-btn" data-id="REC2023012">查看详情</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 记录表格视图 -->
+                <div class="records-table">
+                    <div class="table-container">
+                        <table id="recordsTable">
+                            <thead>
+                                <tr>
+                                    <th>记录编号</th>
+                                    <th>记录类型</th>
+                                    <th>医生姓名</th>
+                                    <th>科室</th>
+                                    <th>记录日期</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>REC2023015</td>
+                                    <td>常规体检</td>
+                                    <td>张医生</td>
+                                    <td>全科</td>
+                                    <td>2023-11-15</td>
+                                    <td><button class="view-record-btn" data-id="REC2023015">查看详情</button></td>
+                                </tr>
+                                <tr>
+                                    <td>REC2023014</td>
+                                    <td>高血压复诊</td>
+                                    <td>李医生</td>
+                                    <td>内科</td>
+                                    <td>2023-10-28</td>
+                                    <td><button class="view-record-btn" data-id="REC2023014">查看详情</button></td>
+                                </tr>
+                                <tr>
+                                    <td>REC2023013</td>
+                                    <td>心脏超声检查</td>
+                                    <td>郑医生</td>
+                                    <td>心血管内科</td>
+                                    <td>2023-10-15</td>
+                                    <td><button class="view-record-btn" data-id="REC2023013">查看详情</button></td>
+                                </tr>
+                                <tr>
+                                    <td>REC2023012</td>
+                                    <td>上呼吸道感染治疗</td>
+                                    <td>王医生</td>
+                                    <td>呼吸内科</td>
+                                    <td>2023-09-20</td>
+                                    <td><button class="view-record-btn" data-id="REC2023012">查看详情</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- 分页控件 -->
+                <div class="pagination">
+                    <div class="page-info">显示 1-4 条，共 12 条记录</div>
+                    <div class="page-controls">
+                        <button class="page-btn" disabled>上一页</button>
+                        <button class="page-btn active">1</button>
+                        <button class="page-btn">2</button>
+                        <button class="page-btn">3</button>
+                        <button class="page-btn">下一页</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- 记录详情模态框 -->
+    <div id="recordDetailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>医疗记录详情</h2>
+                <button class="close-btn" id="closeModalBtn">&times;</button>
+            </div>
+            
+            <div id="recordDetailContent">
+                <div class="record-detail-info">
+                    <div class="record-detail-row">
+                        <div class="record-detail-label">记录编号：</div>
+                        <div class="record-detail-value">REC2023015</div>
+                    </div>
+                    <div class="record-detail-row">
+                        <div class="record-detail-label">记录类型：</div>
+                        <div class="record-detail-value">常规体检</div>
+                    </div>
+                    <div class="record-detail-row">
+                        <div class="record-detail-label">医生姓名：</div>
+                        <div class="record-detail-value">张医生</div>
+                    </div>
+                    <div class="record-detail-row">
+                        <div class="record-detail-label">所属科室：</div>
+                        <div class="record-detail-value">全科</div>
+                    </div>
+                    <div class="record-detail-row">
+                        <div class="record-detail-label">检查日期：</div>
+                        <div class="record-detail-value">2023-11-15</div>
+                    </div>
+                </div>
+                
+                <div class="record-detail-content">
+                    <h3>检查项目</h3>
+                    <p>1. 血常规：红细胞计数、血红蛋白、白细胞计数、血小板计数等均在正常范围内。</p>
+                    <p>2. 尿常规：尿蛋白、尿糖、尿潜血等均为阴性，镜检未见异常。</p>
+                    <p>3. 肝功能：谷丙转氨酶(ALT)、谷草转氨酶(AST)、总胆红素、直接胆红素等均在正常范围内。</p>
+                    <p>4. 肾功能：血肌酐、尿素氮、尿酸等均在正常范围内。</p>
+                    <p>5. 血脂：总胆固醇、甘油三酯、高密度脂蛋白胆固醇、低密度脂蛋白胆固醇等均在正常范围内。</p>
+                    <p>6. 血糖：空腹血糖5.2mmol/L，在正常范围内。</p>
+                    <p>7. 心电图：窦性心律，心率72次/分，未见明显异常。</p>
+                    <p>8. 胸部X光片：双肺野清晰，心影大小形态正常，双侧膈面光滑，肋膈角锐利。</p>
+                </div>
+                
+                <div class="record-detail-content">
+                    <h3>检查结论</h3>
+                    <p>本次体检结果基本正常，未发现明显异常情况。建议保持健康的生活方式，包括均衡饮食、适量运动、充足睡眠、戒烟限酒等。</p>
+                </div>
+                
+                <div class="record-detail-content">
+                    <h3>医生建议</h3>
+                    <p>1. 保持健康饮食，多吃蔬菜水果，减少高脂、高盐、高糖食物摄入。</p>
+                    <p>2. 每周进行至少150分钟中等强度的有氧运动，如快走、慢跑、游泳等。</p>
+                    <p>3. 保持良好的睡眠习惯，每晚睡眠7-8小时。</p>
+                    <p>4. 定期监测血压、血糖等指标，如有异常及时就医。</p>
+                    <p>5. 建议每年进行一次常规体检，及时发现潜在健康问题。</p>
+                </div>
+                
+                <div class="record-prescriptions">
+                    <h3>处方药物</h3>
+                    <ul class="prescription-list">
+                        <li class="prescription-item">
+                            <div>
+                                <div class="prescription-name">复合维生素片</div>
+                                <div class="prescription-info">每日1次，每次1片，口服</div>
+                            </div>
+                            <div class="prescription-info">30片/瓶</div>
+                        </li>
+                        <li class="prescription-item">
+                            <div>
+                                <div class="prescription-name">钙片</div>
+                                <div class="prescription-info">每日1次，每次1片，口服</div>
+                            </div>
+                            <div class="prescription-info">60片/瓶</div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { showAlert, storage } from '../assets/js/utils.js';
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 验证用户登录状态
+            const userInfo = storage.get('userInfo');
+            if (!userInfo || !userInfo.patientType) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // 设置页面内容
+            setupPageContent(userInfo);
+
+            // 设置事件监听器
+            setupEventListeners();
+        });
+
+        // 设置页面内容
+        function setupPageContent(userInfo) {
+            // 更新用户信息显示
+            document.querySelector('.user-name').textContent = userInfo.realName || userInfo.username;
+            
+            // 更新用户类型显示
+            let userTypeText = '普通患者';
+            if (userInfo.patientType === 'elderly') {
+                userTypeText = '老年患者';
+            } else if (userInfo.patientType === 'child') {
+                userTypeText = '儿童患者';
+            }
+            document.querySelector('.user-type').textContent = userTypeText;
+        }
+
+        // 设置事件监听器
+        function setupEventListeners() {
+            // 退出登录按钮
+            document.getElementById('logoutBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                storage.remove('userInfo');
+                showAlert('success', '退出成功！');
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 1000);
+            });
+
+            // 搜索表单提交
+            document.getElementById('searchForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                searchRecords();
+            });
+
+            // 重置搜索
+            document.getElementById('resetSearch').addEventListener('click', function() {
+                document.getElementById('searchForm').reset();
+                searchRecords();
+            });
+
+            // 视图切换
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // 移除所有按钮的active类
+                    document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+                    // 为当前按钮添加active类
+                    this.classList.add('active');
+                    // 切换视图
+                    const view = this.getAttribute('data-view');
+                    if (view === 'cards') {
+                        document.querySelector('.records-cards').style.display = 'grid';
+                        document.querySelector('.records-table').style.display = 'none';
+                    } else {
+                        document.querySelector('.records-cards').style.display = 'none';
+                        document.querySelector('.records-table').style.display = 'block';
+                    }
+                });
+            });
+
+            // 查看记录详情按钮
+            document.querySelectorAll('.view-record-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const recordId = this.getAttribute('data-id');
+                    viewRecordDetail(recordId);
+                });
+            });
+
+            // 分页按钮
+            document.querySelectorAll('.page-btn').forEach(button => {
+                if (!button.disabled && !button.classList.contains('active')) {
+                    button.addEventListener('click', function() {
+                        changePage(this.textContent.trim());
+                    });
+                }
+            });
+
+            // 关闭模态框按钮
+            document.getElementById('closeModalBtn').addEventListener('click', function() {
+                closeRecordDetailModal();
+            });
+
+            // 点击模态框外部关闭
+            window.addEventListener('click', function(event) {
+                const modal = document.getElementById('recordDetailModal');
+                if (event.target === modal) {
+                    closeRecordDetailModal();
+                }
+            });
+        }
+
+        // 搜索记录
+        function searchRecords() {
+            const doctorName = document.getElementById('doctorName').value;
+            const department = document.getElementById('department').value;
+            const recordType = document.getElementById('recordType').value;
+            const dateRange = document.getElementById('dateRange').value;
+            
+            // 模拟搜索操作
+            showAlert('info', '正在搜索医疗记录...');
+            
+            // 实际项目中，这里会发送搜索请求到服务器
+            setTimeout(() => {
+                showAlert('success', '搜索完成！');
+                // 在实际项目中，这里会根据搜索结果更新列表
+            }, 800);
+        }
+
+        // 查看记录详情
+        function viewRecordDetail(recordId) {
+            // 模拟加载记录详情
+            showAlert('info', `正在加载记录 ${recordId} 的详情...`);
+            
+            // 实际项目中，这里会发送请求获取记录详情
+            setTimeout(() => {
+                // 在实际项目中，这里会根据获取到的详情更新模态框内容
+                const modal = document.getElementById('recordDetailModal');
+                modal.style.display = 'flex';
+            }, 800);
+        }
+
+        // 关闭记录详情模态框
+        function closeRecordDetailModal() {
+            const modal = document.getElementById('recordDetailModal');
+            modal.style.display = 'none';
+        }
+
+        // 更改页面
+        function changePage(pageNumber) {
+            // 模拟分页操作
+            showAlert('info', `正在加载第 ${pageNumber} 页...`);
+            
+            // 实际项目中，这里会发送分页请求到服务器
+            setTimeout(() => {
+                showAlert('success', `已加载第 ${pageNumber} 页`);
+                // 在实际项目中，这里会更新列表内容和分页控件
+            }, 800);
+        }
+    </script>
+</body>
+</html>

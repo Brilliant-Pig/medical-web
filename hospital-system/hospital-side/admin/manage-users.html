@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户管理 - 医疗管理系统</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <style>
+        /* 用户管理页面特定样式 */
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .page-header h1 {
+            color: #333;
+        }
+        
+        .search-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .search-container input {
+            flex: 1;
+            max-width: 300px;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .user-table {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .user-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .user-table th,
+        .user-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .user-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+        
+        .user-table tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .action-buttons button,
+        .action-buttons a {
+            padding: 4px 8px;
+            font-size: 12px;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+            margin-top: 20px;
+        }
+        
+        .pagination button {
+            padding: 6px 12px;
+            border: 1px solid #ddd;
+            background-color: white;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        
+        .pagination button.active {
+            background-color: #1a73e8;
+            color: white;
+            border-color: #1a73e8;
+        }
+        
+        .pagination button:disabled {
+            background-color: #f8f9fa;
+            cursor: not-allowed;
+        }
+        
+        /* 模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-header h2 {
+            margin: 0;
+        }
+        
+        .modal-header .close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        
+        .modal-header .close:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard-container {
+                flex-direction: column;
+            }
+            
+            .page-header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+            
+            .search-container {
+                flex-direction: column;
+            }
+            
+            .search-container input {
+                max-width: 100%;
+            }
+            
+            /* 表格响应式处理 */
+            .user-table {
+                overflow-x: auto;
+            }
+            
+            .user-table table {
+                min-width: 600px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- 侧边栏导航 -->
+        <aside class="sidebar">
+            <h3>管理员菜单</h3>
+            <ul>
+                <li><a href="dashboard.html">仪表盘</a></li>
+                <li><a href="manage-users.html" class="active">用户管理</a></li>
+                <li><a href="manage-departments.html">科室管理</a></li>
+                <li><a href="system-settings.html">系统设置</a></li>
+                <li><a href="../login.html" id="logoutBtn">退出登录</a></li>
+            </ul>
+        </aside>
+        
+        <!-- 主内容区域 -->
+        <main class="main-content">
+            <div class="page-header">
+                <h1>用户管理</h1>
+                <button id="addUserBtn" class="btn btn-primary">添加用户</button>
+            </div>
+            
+            <!-- 搜索和筛选 -->
+            <div class="search-container">
+                <input type="text" id="searchInput" placeholder="搜索用户...">
+                <select id="userTypeFilter" class="form-control" title="按用户类型筛选">
+                    <option value="all">所有用户</option>
+                    <option value="admin">管理员</option>
+                    <option value="doctor">医生</option>
+                </select>
+                <select id="departmentFilter" class="form-control" title="按科室筛选">
+                    <option value="all">所有科室</option>
+                    <option value="internal">内科</option>
+                    <option value="surgery">外科</option>
+                    <option value="pediatrics">儿科</option>
+                    <option value="gynecology">妇科</option>
+                    <option value="ophthalmology">眼科</option>
+                    <option value="dermatology">皮肤科</option>
+                    <option value="ent">耳鼻喉科</option>
+                    <option value="neurology">神经内科</option>
+                    <option value="cardiology">心内科</option>
+                </select>
+            </div>
+            
+            <!-- 用户表格 -->
+            <div class="user-table">
+                <table id="usersTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>用户名</th>
+                            <th>姓名</th>
+                            <th>用户类型</th>
+                            <th>科室</th>
+                            <th>联系电话</th>
+                            <th>邮箱</th>
+                            <th>状态</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody">
+                        <!-- 用户数据将通过JavaScript动态生成 -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- 分页 -->
+            <div class="pagination">
+                <button id="prevPage" disabled>上一页</button>
+                <button class="active">1</button>
+                <button>2</button>
+                <button>3</button>
+                <button>4</button>
+                <button>5</button>
+                <button id="nextPage">下一页</button>
+            </div>
+        </main>
+    </div>
+    
+    <!-- 添加/编辑用户模态框 -->
+    <div id="userModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">添加用户</h2>
+                <button id="closeModal" class="close">&times;</button>
+            </div>
+            
+            <form id="userForm">
+                <input type="hidden" id="userId">
+                
+                <div class="form-group">
+                    <label for="userName">用户名</label>
+                    <input type="text" id="userName" name="userName" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="fullName">真实姓名</label>
+                    <input type="text" id="fullName" name="fullName" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="userType">用户类型</label>
+                    <select id="userType" name="userType" class="form-control" required title="用户类型">
+                        <option value="admin">管理员</option>
+                        <option value="doctor">医生</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="department">所属科室</label>
+                    <select id="department" name="department" class="form-control" title="所属科室">
+                        <option value="">请选择科室</option>
+                        <option value="internal">内科</option>
+                        <option value="surgery">外科</option>
+                        <option value="pediatrics">儿科</option>
+                        <option value="gynecology">妇科</option>
+                        <option value="ophthalmology">眼科</option>
+                        <option value="dermatology">皮肤科</option>
+                        <option value="ent">耳鼻喉科</option>
+                        <option value="neurology">神经内科</option>
+                        <option value="cardiology">心内科</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="contact">联系电话</label>
+                    <input type="tel" id="contact" name="contact" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">邮箱</label>
+                    <input type="email" id="email" name="email" class="form-control" required>
+                </div>
+                
+                <div class="form-group" id="passwordGroup">
+                    <label for="password">密码</label>
+                    <input type="password" id="password" name="password" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="status">状态</label>
+                    <select id="status" name="status" class="form-control" required title="用户状态">
+                        <option value="active">启用</option>
+                        <option value="inactive">禁用</option>
+                    </select>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" id="cancelBtn" class="btn btn-secondary">取消</button>
+                    <button type="submit" class="btn btn-primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        import { validateForm, showAlert, storage } from '../../assets/js/utils.js';
+
+        // 模拟用户数据
+        const usersData = [
+            { id: 1, username: 'admin001', fullname: '张三', userType: 'admin', department: '', contact: '13800138001', email: 'admin001@hospital.com', status: 'active' },
+            { id: 2, username: 'doctor001', fullname: '李四', userType: 'doctor', department: 'internal', contact: '13800138002', email: 'doctor001@hospital.com', status: 'active' },
+            { id: 3, username: 'doctor002', fullname: '王五', userType: 'doctor', department: 'surgery', contact: '13800138003', email: 'doctor002@hospital.com', status: 'active' },
+            { id: 4, username: 'doctor003', fullname: '赵六', userType: 'doctor', department: 'pediatrics', contact: '13800138004', email: 'doctor003@hospital.com', status: 'active' },
+            { id: 5, username: 'doctor004', fullname: '钱七', userType: 'doctor', department: 'gynecology', contact: '13800138005', email: 'doctor004@hospital.com', status: 'active' },
+            { id: 6, username: 'doctor005', fullname: '孙八', userType: 'doctor', department: 'ophthalmology', contact: '13800138006', email: 'doctor005@hospital.com', status: 'active' },
+            { id: 7, username: 'doctor006', fullname: '周九', userType: 'doctor', department: 'dermatology', contact: '13800138007', email: 'doctor006@hospital.com', status: 'inactive' },
+            { id: 8, username: 'doctor007', fullname: '吴十', userType: 'doctor', department: 'ent', contact: '13800138008', email: 'doctor007@hospital.com', status: 'active' },
+            { id: 9, username: 'admin002', fullname: '郑十一', userType: 'admin', department: '', contact: '13800138009', email: 'admin002@hospital.com', status: 'active' },
+            { id: 10, username: 'doctor008', fullname: '王十二', userType: 'doctor', department: 'neurology', contact: '13800138010', email: 'doctor008@hospital.com', status: 'active' },
+            { id: 11, username: 'doctor009', fullname: '李十三', userType: 'doctor', department: 'cardiology', contact: '13800138011', email: 'doctor009@hospital.com', status: 'active' },
+            { id: 12, username: 'doctor010', fullname: '张十四', userType: 'doctor', department: 'internal', contact: '13800138012', email: 'doctor010@hospital.com', status: 'active' },
+        ];
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 验证用户登录状态
+            const userInfo = storage.get('userInfo');
+            if (!userInfo || userInfo.userType !== 'admin') {
+                window.location.href = '../login.html';
+                return;
+            }
+
+            // 渲染用户表格
+            renderUsersTable(usersData);
+
+            // 事件监听器
+            setupEventListeners();
+        });
+
+        // 设置事件监听器
+        function setupEventListeners() {
+            // 添加用户按钮
+            document.getElementById('addUserBtn').addEventListener('click', function() {
+                openModal('添加用户');
+                // 重置表单
+                document.getElementById('userForm').reset();
+                document.getElementById('userId').value = '';
+                document.getElementById('passwordGroup').style.display = 'block';
+                document.getElementById('department').required = document.getElementById('userType').value === 'doctor';
+            });
+
+            // 关闭模态框
+            document.getElementById('closeModal').addEventListener('click', closeModal);
+            document.getElementById('cancelBtn').addEventListener('click', closeModal);
+
+            // 用户类型变更时，控制科室字段的必填性
+            document.getElementById('userType').addEventListener('change', function() {
+                document.getElementById('department').required = this.value === 'doctor';
+            });
+
+            // 表单提交
+            document.getElementById('userForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                // 表单验证
+                if (!validateForm('userForm')) {
+                    return;
+                }
+
+                // 获取表单数据
+                const userId = document.getElementById('userId').value;
+                const formData = {
+                    userName: document.getElementById('userName').value,
+                    fullName: document.getElementById('fullName').value,
+                    userType: document.getElementById('userType').value,
+                    department: document.getElementById('department').value,
+                    contact: document.getElementById('contact').value,
+                    email: document.getElementById('email').value,
+                    password: document.getElementById('password').value,
+                    status: document.getElementById('status').value
+                };
+
+                // 模拟提交到服务器
+                console.log('保存用户信息:', formData);
+
+                // 模拟成功保存
+                showAlert('success', userId ? '用户信息更新成功' : '用户添加成功');
+
+                // 关闭模态框
+                closeModal();
+
+                // 重新渲染表格（实际项目中应从服务器获取最新数据）
+                if (userId) {
+                    // 更新现有用户
+                    const index = usersData.findIndex(user => user.id == userId);
+                    if (index !== -1) {
+                        usersData[index] = {
+                            ...usersData[index],
+                            username: formData.userName,
+                            fullname: formData.fullName,
+                            userType: formData.userType,
+                            department: formData.department,
+                            contact: formData.contact,
+                            email: formData.email,
+                            status: formData.status
+                        };
+                    }
+                } else {
+                    // 添加新用户
+                    const newUserId = Math.max(...usersData.map(user => user.id)) + 1;
+                    usersData.push({
+                        id: newUserId,
+                        username: formData.userName,
+                        fullname: formData.fullName,
+                        userType: formData.userType,
+                        department: formData.department,
+                        contact: formData.contact,
+                        email: formData.email,
+                        status: formData.status
+                    });
+                }
+
+                // 重新渲染表格
+                renderUsersTable(usersData);
+            });
+
+            // 搜索功能
+            document.getElementById('searchInput').addEventListener('input', function() {
+                filterUsers();
+            });
+
+            // 用户类型筛选
+            document.getElementById('userTypeFilter').addEventListener('change', function() {
+                filterUsers();
+            });
+
+            // 科室筛选
+            document.getElementById('departmentFilter').addEventListener('change', function() {
+                filterUsers();
+            });
+
+            // 分页按钮
+            document.getElementById('prevPage').addEventListener('click', function() {
+                // 实际项目中应实现分页逻辑
+                showAlert('info', '分页功能将在实际项目中实现');
+            });
+
+            document.getElementById('nextPage').addEventListener('click', function() {
+                // 实际项目中应实现分页逻辑
+                showAlert('info', '分页功能将在实际项目中实现');
+            });
+
+            // 退出登录
+            document.getElementById('logoutBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                storage.remove('userInfo');
+                showAlert('success', '退出成功！');
+                setTimeout(() => {
+                    window.location.href = '../login.html';
+                }, 1000);
+            });
+
+            // 点击模态框外部关闭
+            window.addEventListener('click', function(event) {
+                const modal = document.getElementById('userModal');
+                if (event.target === modal) {
+                    closeModal();
+                }
+            });
+        }
+
+        // 渲染用户表格
+        function renderUsersTable(users) {
+            const tableBody = document.getElementById('usersTableBody');
+            tableBody.innerHTML = '';
+
+            users.forEach(user => {
+                const row = document.createElement('tr');
+                
+                // 科室显示名称映射
+                const departmentNames = {
+                    'internal': '内科',
+                    'surgery': '外科',
+                    'pediatrics': '儿科',
+                    'gynecology': '妇科',
+                    'ophthalmology': '眼科',
+                    'dermatology': '皮肤科',
+                    'ent': '耳鼻喉科',
+                    'neurology': '神经内科',
+                    'cardiology': '心内科',
+                    '': '无'
+                };
+
+                // 用户类型显示名称映射
+                const userTypeNames = {
+                    'admin': '管理员',
+                    'doctor': '医生'
+                };
+
+                // 状态显示样式
+                const statusStyle = user.status === 'active' ? 'color: green;' : 'color: red;';
+                const statusText = user.status === 'active' ? '启用' : '禁用';
+
+                row.innerHTML = `
+                    <td>${user.id}</td>
+                    <td>${user.username}</td>
+                    <td>${user.fullname}</td>
+                    <td>${userTypeNames[user.userType] || user.userType}</td>
+                    <td>${departmentNames[user.department] || user.department}</td>
+                    <td>${user.contact}</td>
+                    <td>${user.email}</td>
+                    <td style="${statusStyle}">${statusText}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn btn-primary btn-edit" data-id="${user.id}">编辑</button>
+                            <button class="btn btn-secondary btn-view" data-id="${user.id}">查看</button>
+                            <button class="btn btn-danger btn-delete" data-id="${user.id}">删除</button>
+                        </div>
+                    </td>
+                `;
+
+                tableBody.appendChild(row);
+            });
+
+            // 添加编辑、查看、删除按钮的事件监听器
+            document.querySelectorAll('.btn-edit').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const userId = this.getAttribute('data-id');
+                    editUser(userId);
+                });
+            });
+
+            document.querySelectorAll('.btn-view').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const userId = this.getAttribute('data-id');
+                    viewUser(userId);
+                });
+            });
+
+            document.querySelectorAll('.btn-delete').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const userId = this.getAttribute('data-id');
+                    deleteUser(userId);
+                });
+            });
+        }
+
+        // 筛选用户
+        function filterUsers() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const userTypeFilter = document.getElementById('userTypeFilter').value;
+            const departmentFilter = document.getElementById('departmentFilter').value;
+
+            const filteredUsers = usersData.filter(user => {
+                const matchesSearch = user.username.toLowerCase().includes(searchTerm) || 
+                                      user.fullname.toLowerCase().includes(searchTerm) ||
+                                      user.contact.includes(searchTerm) ||
+                                      user.email.toLowerCase().includes(searchTerm);
+                
+                const matchesUserType = userTypeFilter === 'all' || user.userType === userTypeFilter;
+                
+                const matchesDepartment = departmentFilter === 'all' || user.department === departmentFilter;
+                
+                return matchesSearch && matchesUserType && matchesDepartment;
+            });
+
+            renderUsersTable(filteredUsers);
+        }
+
+        // 打开模态框
+        function openModal(title) {
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('userModal').style.display = 'flex';
+        }
+
+        // 关闭模态框
+        function closeModal() {
+            document.getElementById('userModal').style.display = 'none';
+        }
+
+        // 编辑用户
+        function editUser(id) {
+            const user = usersData.find(user => user.id == id);
+            if (user) {
+                document.getElementById('userId').value = user.id;
+                document.getElementById('userName').value = user.username;
+                document.getElementById('fullName').value = user.fullname;
+                document.getElementById('userType').value = user.userType;
+                document.getElementById('department').value = user.department;
+                document.getElementById('contact').value = user.contact;
+                document.getElementById('email').value = user.email;
+                document.getElementById('status').value = user.status;
+                
+                // 编辑时密码不是必填项
+                document.getElementById('password').required = false;
+                document.getElementById('passwordGroup').style.display = 'none';
+                
+                // 控制科室字段的必填性
+                document.getElementById('department').required = user.userType === 'doctor';
+                
+                openModal('编辑用户');
+            }
+        }
+
+        // 查看用户
+        function viewUser(id) {
+            const user = usersData.find(user => user.id == id);
+            if (user) {
+                // 科室显示名称映射
+                const departmentNames = {
+                    'internal': '内科',
+                    'surgery': '外科',
+                    'pediatrics': '儿科',
+                    'gynecology': '妇科',
+                    'ophthalmology': '眼科',
+                    'dermatology': '皮肤科',
+                    'ent': '耳鼻喉科',
+                    'neurology': '神经内科',
+                    'cardiology': '心内科',
+                    '': '无'
+                };
+
+                // 用户类型显示名称映射
+                const userTypeNames = {
+                    'admin': '管理员',
+                    'doctor': '医生'
+                };
+
+                // 状态显示文本
+                const statusText = user.status === 'active' ? '启用' : '禁用';
+
+                // 在实际项目中，这里可以打开一个查看详情的模态框
+                // 这里简单显示一个提示
+                showAlert('info', `用户详情：\nID: ${user.id}\n用户名: ${user.username}\n姓名: ${user.fullname}\n类型: ${userTypeNames[user.userType]}\n科室: ${departmentNames[user.department]}\n联系电话: ${user.contact}\n邮箱: ${user.email}\n状态: ${statusText}`);
+            }
+        }
+
+        // 删除用户
+        function deleteUser(id) {
+            if (confirm('确定要删除这个用户吗？此操作无法撤销。')) {
+                // 模拟删除操作
+                console.log('删除用户:', id);
+                
+                // 从模拟数据中移除用户
+                const index = usersData.findIndex(user => user.id == id);
+                if (index !== -1) {
+                    usersData.splice(index, 1);
+                    
+                    // 重新渲染表格
+                    renderUsersTable(usersData);
+                    
+                    showAlert('success', '用户已成功删除');
+                }
+            }
+        }
+    </script>
+</body>
+</html>
